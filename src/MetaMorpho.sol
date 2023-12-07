@@ -505,6 +505,8 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
 
     /// @notice Accepts the pending cap of the market defined by `id`.
     function acceptCap(Id id) external afterTimelock(pendingCap[id].validAt) {
+        _updateLastTotalAssets(_accrueFee());
+
         // Safe "unchecked" cast because pendingCap <= type(uint184).max.
         _setCap(id, uint184(pendingCap[id].value));
     }
@@ -779,6 +781,8 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
                 }
 
                 marketConfig.enabled = true;
+
+                lastTotalAssets = totalAssets();
             }
 
             marketConfig.removableAt = 0;
