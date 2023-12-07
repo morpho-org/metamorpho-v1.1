@@ -352,7 +352,7 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
         bool[] memory seen = new bool[](currLength);
         Id[] memory newWithdrawQueue = new Id[](newLength);
 
-        uint256 lostSupply;
+        uint256 lostAssets;
 
         for (uint256 i; i < newLength; ++i) {
             uint256 prevIndex = indexes[i];
@@ -384,7 +384,10 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
                     slot[0] = id.marketTotalSupplyAssetsAndSharesSlot();
                     bytes32[] memory res = MORPHO.extSloads(slot);
 
-                    lostSupply += supplyShares.toAssetsDown(uint128(uint256(res[0])), uint256(res[0] >> 128));
+                    uint256 totalSupplyAssets = uint128(uint256(res[0]));
+                    uint256 totalSupplyShares = uint256(res[0] >> 128);
+
+                    lostAssets += supplyShares.toAssetsDown(totalSupplyAssets, totalSupplyShares);
                 }
 
                 delete config[id];
@@ -394,8 +397,7 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
         withdrawQueue = newWithdrawQueue;
 
         // Accrue interests on all the enabled markets except the removed ones.
-        _updateLastTotalAssets(lastTotalAssets.zeroFloorSub(lostSupply));
-        _updateLastTotalAssets(_accrueFee());
+        _updateLastTotalAssets(lastTotalAssets.zeroFloorSub(lostAssets));
 
         emit EventsLib.SetWithdrawQueue(_msgSender(), newWithdrawQueue);
     }
