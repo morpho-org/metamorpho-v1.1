@@ -344,6 +344,8 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
     /// simply bundle a reallocation that withdraws max from this market with a call to `sortWithdrawQueue`.
     /// @param indexes The indexes of each market in the previous withdraw queue, in the new withdraw queue's order.
     function updateWithdrawQueue(uint256[] calldata indexes) external onlyAllocatorRole {
+        _updateLastTotalAssets(_accrueFee());
+
         uint256 newLength = indexes.length;
         uint256 currLength = withdrawQueue.length;
 
@@ -380,6 +382,8 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
         }
 
         withdrawQueue = newWithdrawQueue;
+
+        _updateLastTotalAssets(totalAssets());
 
         emit EventsLib.SetWithdrawQueue(_msgSender(), newWithdrawQueue);
     }
