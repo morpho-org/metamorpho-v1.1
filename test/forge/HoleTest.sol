@@ -14,7 +14,7 @@ contract ModifiedMorpho {
     }
 }
 
-contract SharePriceTest is IntegrationTest {
+contract HoleTest is IntegrationTest {
     using stdStorage for StdStorage;
     using MorphoBalancesLib for IMorpho;
     using MarketParamsLib for MarketParams;
@@ -111,5 +111,40 @@ contract SharePriceTest is IntegrationTest {
         vault.deposit(0, ONBEHALF); // update hole.
 
         assertEq(vault.hole(), expectedHole, "totalAssets decreased");
+    }
+
+    function test_maxWithdrawWithHole() public {
+        loanToken.setBalance(SUPPLIER, 1 ether);
+
+        vm.prank(SUPPLIER);
+        vault.deposit(1 ether, ONBEHALF);
+
+        assertEq(vault.maxWithdraw(ONBEHALF), 1 ether);
+
+        _writeTotalSupplyAssets(Id.unwrap(allMarkets[0].id()), 0.5 ether);
+
+        vault.deposit(0, ONBEHALF); // update hole.
+
+        assertEq(vault.maxWithdraw(ONBEHALF), 0.5 ether);
+    }
+
+    function test_maxWithdrawWithHole(uint256 assets, uint128 expectedHole) public {
+        assets = bound(assets, MIN_TEST_ASSETS, MAX_TEST_ASSETS);
+
+        loanToken.setBalance(SUPPLIER, assets);
+
+        vm.prank(SUPPLIER);
+        vault.deposit(assets, ONBEHALF);
+
+        uint128 totalSupplyAssetsBefore = morpho.market(allMarkets[0].id()).totalSupplyAssets;
+        expectedHole = uint128(bound(expectedHole, 0, totalSupplyAssetsBefore));
+
+        assertEq(vault.maxWithdraw(ONBEHALF), totalSupplyAssetsBefore);
+
+        _writeTotalSupplyAssets(Id.unwrap(allMarkets[0].id()), totalSupplyAssetsBefore - expectedHole);
+
+        vault.deposit(0, ONBEHALF); // update hole.
+
+        assertEq(vault.maxWithdraw(ONBEHALF), totalSupplyAssetsBefore - expectedHole);
     }
 }
