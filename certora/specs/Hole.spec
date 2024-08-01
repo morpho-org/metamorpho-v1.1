@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-using Util as Util;
+import "Range.spec";
 
 rule holeIncreases(method f, env e, calldataarg args) {
     uint256 holeBefore = hole();
@@ -11,3 +11,15 @@ rule holeIncreases(method f, env e, calldataarg args) {
 
     assert holeBefore <= holeAfter;
 }
+
+// rule totalAssetsIncreases(method f, env e, calldataarg args) {
+//     uint256 totalAssetsBefore = totalAssets();
+
+//     require f != withdraw;
+
+//     f(e, args);
+
+//     uint256 totalAssetsAfter = totalAssets();
+
+//     assert totalAssetsBefore <= totalAssetsAfter;
+// }
