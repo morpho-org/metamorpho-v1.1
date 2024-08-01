@@ -30,6 +30,7 @@ jobs:
           - Roles
           - Timelock
           - Tokens
+          - Hole
 
     steps:
       - uses: actions/checkout@v4
