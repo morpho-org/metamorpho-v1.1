@@ -571,14 +571,10 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
     }
 
     /// @inheritdoc IERC4626
-    function totalAssets() public view override returns (uint256 assets) {
-        assets += hole;
-        for (uint256 i; i < withdrawQueue.length; ++i) {
-            assets += MORPHO.expectedSupplyAssets(_marketParams(withdrawQueue[i]), address(this));
-        }
-        if (assets < lastTotalAssets) {
-            assets = lastTotalAssets;
-        }
+    function totalAssets() public view override returns (uint256) {
+        (uint256 newTotalAssets,) = _newTotalAssetsAndHole();
+
+        return newTotalAssets;
     }
 
     /* ERC4626 (INTERNAL) */
@@ -892,17 +888,8 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
     /// @dev Computes and returns the fee shares (`feeShares`) to mint and the new vault's total assets
     /// (`newTotalAssets`).
     function _accruedFeeShares() internal view returns (uint256, uint256, uint256) {
-        uint256 realTotalAssets;
-        for (uint256 i; i < withdrawQueue.length; ++i) {
-            realTotalAssets += MORPHO.expectedSupplyAssets(_marketParams(withdrawQueue[i]), address(this));
-        }
+        (uint256 newTotalAssets, uint256 newHole) = _newTotalAssetsAndHole();
 
-        // Handle the case where the vault lost some assets.
-        uint256 newHole;
-        if (realTotalAssets < lastTotalAssets - hole) newHole = lastTotalAssets - realTotalAssets;
-        else newHole = hole;
-
-        uint256 newTotalAssets = realTotalAssets + newHole;
         uint256 totalInterest = newTotalAssets.zeroFloorSub(lastTotalAssets);
         uint256 feeShares;
         if (totalInterest != 0 && fee != 0) {
@@ -915,5 +902,21 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
         }
 
         return (feeShares, newTotalAssets, newHole);
+    }
+
+    function _newTotalAssetsAndHole() internal view returns (uint256, uint256) {
+        uint256 realTotalAssets;
+        for (uint256 i; i < withdrawQueue.length; ++i) {
+            realTotalAssets += MORPHO.expectedSupplyAssets(_marketParams(withdrawQueue[i]), address(this));
+        }
+
+        // Handle the case where the vault lost some assets.
+        uint256 newHole;
+        if (realTotalAssets < lastTotalAssets - hole) newHole = lastTotalAssets - realTotalAssets;
+        else newHole = hole;
+
+        uint256 newTotalAssets = realTotalAssets + newHole;
+
+        return (newTotalAssets, newHole);
     }
 }
