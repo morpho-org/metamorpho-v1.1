@@ -39,7 +39,7 @@ contract HoleTest is IntegrationTest {
         _sortSupplyQueueIdleLast();
     }
 
-    function test_totalAssetsCannotDecrease(uint256 assets, uint128 totalSupplyAssets) public {
+    function test_totalAssetsDecrease(uint256 assets, uint128 expectedHole) public {
         assets = bound(assets, MIN_TEST_ASSETS, MAX_TEST_ASSETS);
 
         loanToken.setBalance(SUPPLIER, assets);
@@ -47,19 +47,32 @@ contract HoleTest is IntegrationTest {
         vm.prank(SUPPLIER);
         vault.deposit(assets, ONBEHALF);
 
+        uint128 totalSupplyAssetsBefore = morpho.market(allMarkets[0].id()).totalSupplyAssets;
+        expectedHole = uint128(bound(expectedHole, 0, totalSupplyAssetsBefore));
+
         uint256 totalAssetsBefore = vault.totalAssets();
-        _writeTotalSupplyAssets(Id.unwrap(allMarkets[0].id()), totalSupplyAssets);
+        _writeTotalSupplyAssets(Id.unwrap(allMarkets[0].id()), totalSupplyAssetsBefore - expectedHole);
         uint256 totalAssetsAfter = vault.totalAssets();
 
-        assertGe(totalAssetsAfter, totalAssetsBefore, "totalAssets decreased");
+        assertLe(totalAssetsAfter, totalAssetsBefore, "totalAssets did not decreased");
     }
 
-    function invariant_totalAssetsCannotDecrease() public {
-        uint256 totalAssetsBefore = vault.totalAssets();
-        _writeTotalSupplyAssets(Id.unwrap(allMarkets[0].id()), 0);
-        uint256 totalAssetsAfter = vault.totalAssets();
+    function test_lastTotalAssetsNoDecrease(uint256 assets, uint128 expectedHole) public {
+        assets = bound(assets, MIN_TEST_ASSETS, MAX_TEST_ASSETS);
 
-        assertGe(totalAssetsAfter, totalAssetsBefore, "totalAssets decreased");
+        loanToken.setBalance(SUPPLIER, assets);
+
+        vm.prank(SUPPLIER);
+        vault.deposit(assets, ONBEHALF);
+
+        uint128 totalSupplyAssetsBefore = morpho.market(allMarkets[0].id()).totalSupplyAssets;
+        expectedHole = uint128(bound(expectedHole, 0, totalSupplyAssetsBefore));
+
+        uint256 lastTotalAssetsBefore = vault.totalAssets();
+        _writeTotalSupplyAssets(Id.unwrap(allMarkets[0].id()), totalSupplyAssetsBefore - expectedHole);
+        uint256 lastTotalAssetsAfter = vault.totalAssets();
+
+        assertLe(totalAssetsAfter, totalAssetsBefore, "totalAssets did not decreased");
     }
 
     function test_HoleValue() public {
@@ -72,10 +85,10 @@ contract HoleTest is IntegrationTest {
 
         vault.deposit(0, ONBEHALF); // update hole.
 
-        assertEq(vault.hole(), 0.5 ether, "totalAssets decreased");
+        assertEq(vault.hole(), 0.5 ether, "hole");
     }
 
-    function test_HoleValue(uint256 assets, uint128 expectedHole) public {
+    function test_HoleValue(uint256 assets, uint128 expectedHole) public returns (uint128) {
         assets = bound(assets, MIN_TEST_ASSETS, MAX_TEST_ASSETS);
 
         loanToken.setBalance(SUPPLIER, assets);
@@ -90,7 +103,44 @@ contract HoleTest is IntegrationTest {
 
         vault.deposit(0, ONBEHALF); // update hole.
 
-        assertEq(vault.hole(), expectedHole, "totalAssets decreased");
+        assertEq(vault.hole(), expectedHole, "hole");
+
+        return expectedHole;
+    }
+
+    function test_resupplyOnHole(uint256 assets, uint128 expectedHole, uint256 assets2) public {
+        expectedHole = test_HoleValue(assets, expectedHole);
+
+        assets2 = bound(assets2, MIN_TEST_ASSETS, MAX_TEST_ASSETS);
+
+        loanToken.setBalance(SUPPLIER, assets2);
+
+        vm.prank(SUPPLIER);
+        vault.deposit(assets2, ONBEHALF);
+
+        assertEq(vault.hole(), expectedHole, "hole");
+    }
+
+    function test_newHoleOnHole(uint256 firstSupply, uint128 firstHole, uint256 secondSupply, uint128 secondHole)
+        public
+    {
+        firstHole = test_HoleValue(firstSupply, firstHole);
+
+        secondSupply = bound(secondSupply, MIN_TEST_ASSETS, MAX_TEST_ASSETS);
+
+        loanToken.setBalance(SUPPLIER, secondSupply);
+
+        vm.prank(SUPPLIER);
+        vault.deposit(secondSupply, ONBEHALF);
+
+        uint128 totalSupplyAssetsBefore = morpho.market(allMarkets[0].id()).totalSupplyAssets;
+        secondHole = uint128(bound(secondHole, 0, totalSupplyAssetsBefore));
+
+        _writeTotalSupplyAssets(Id.unwrap(allMarkets[0].id()), totalSupplyAssetsBefore - secondHole);
+
+        vault.deposit(0, ONBEHALF); // update hole.
+
+        assertEq(vault.hole(), firstHole + secondHole, "hole");
     }
 
     function test_HoleEvent(uint256 assets, uint128 expectedHole) public {
