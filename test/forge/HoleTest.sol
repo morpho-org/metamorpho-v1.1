@@ -68,14 +68,15 @@ contract HoleTest is IntegrationTest {
         uint128 totalSupplyAssetsBefore = morpho.market(allMarkets[0].id()).totalSupplyAssets;
         expectedHole = uint128(bound(expectedHole, 0, totalSupplyAssetsBefore));
 
-        uint256 lastTotalAssetsBefore = vault.totalAssets();
+        uint256 lastTotalAssetsBefore = vault.lastTotalAssets();
         _writeTotalSupplyAssets(Id.unwrap(allMarkets[0].id()), totalSupplyAssetsBefore - expectedHole);
-        uint256 lastTotalAssetsAfter = vault.totalAssets();
+        vault.deposit(0, ONBEHALF); // update hole.
+        uint256 lastTotalAssetsAfter = vault.lastTotalAssets();
 
-        assertLe(totalAssetsAfter, totalAssetsBefore, "totalAssets did not decreased");
+        assertGe(lastTotalAssetsAfter, lastTotalAssetsBefore, "totalAssets did not decreased");
     }
 
-    function test_HoleValue() public {
+    function test_holeValue() public {
         loanToken.setBalance(SUPPLIER, 1 ether);
 
         vm.prank(SUPPLIER);
@@ -88,7 +89,7 @@ contract HoleTest is IntegrationTest {
         assertEq(vault.hole(), 0.5 ether, "hole");
     }
 
-    function test_HoleValue(uint256 assets, uint128 expectedHole) public returns (uint128) {
+    function test_holeValue(uint256 assets, uint128 expectedHole) public returns (uint128) {
         assets = bound(assets, MIN_TEST_ASSETS, MAX_TEST_ASSETS);
 
         loanToken.setBalance(SUPPLIER, assets);
@@ -109,7 +110,7 @@ contract HoleTest is IntegrationTest {
     }
 
     function test_resupplyOnHole(uint256 assets, uint128 expectedHole, uint256 assets2) public {
-        expectedHole = test_HoleValue(assets, expectedHole);
+        expectedHole = test_holeValue(assets, expectedHole);
 
         assets2 = bound(assets2, MIN_TEST_ASSETS, MAX_TEST_ASSETS);
 
@@ -124,7 +125,7 @@ contract HoleTest is IntegrationTest {
     function test_newHoleOnHole(uint256 firstSupply, uint128 firstHole, uint256 secondSupply, uint128 secondHole)
         public
     {
-        firstHole = test_HoleValue(firstSupply, firstHole);
+        firstHole = test_holeValue(firstSupply, firstHole);
 
         secondSupply = bound(secondSupply, MIN_TEST_ASSETS, MAX_TEST_ASSETS);
 
