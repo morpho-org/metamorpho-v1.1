@@ -108,7 +108,7 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
     uint256 public lastTotalAssets;
 
     /// @inheritdoc IMetaMorphoBase
-    uint256 public hole;
+    uint256 public lostAssets;
 
     /* CONSTRUCTOR */
 
@@ -572,7 +572,7 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
 
     /// @inheritdoc IERC4626
     function totalAssets() public view override returns (uint256) {
-        (uint256 newTotalAssets,) = _newTotalAssetsAndHole();
+        (uint256 newTotalAssets,) = _newTotalAndLostAssets();
 
         return newTotalAssets;
     }
@@ -872,11 +872,11 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
 
     /// @dev Accrues the fee and mints the fee shares to the fee recipient.
     function _accrueInterest() internal returns (uint256) {
-        (uint256 feeShares, uint256 newTotalAssets, uint256 newHole) = _accruedFeeShares();
+        (uint256 feeShares, uint256 newTotalAssets, uint256 newLostAssets) = _accruedFeeShares();
 
         _updateLastTotalAssets(newTotalAssets);
-        hole = newHole;
-        emit EventsLib.UpdateHole(newHole);
+        lostAssets = newLostAssets;
+        emit EventsLib.UpdateLostAssets(newLostAssets);
 
         if (feeShares != 0) _mint(feeRecipient, feeShares);
 
@@ -888,7 +888,7 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
     /// @dev Computes and returns the fee shares (`feeShares`) to mint and the new vault's total assets
     /// (`newTotalAssets`).
     function _accruedFeeShares() internal view returns (uint256, uint256, uint256) {
-        (uint256 newTotalAssets, uint256 newHole) = _newTotalAssetsAndHole();
+        (uint256 newTotalAssets, uint256 newLostAssets) = _newTotalAndLostAssets();
 
         uint256 totalInterest = newTotalAssets.zeroFloorSub(lastTotalAssets);
         uint256 feeShares;
@@ -901,22 +901,25 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
                 _convertToSharesWithTotals(feeAssets, totalSupply(), newTotalAssets - feeAssets, Math.Rounding.Floor);
         }
 
-        return (feeShares, newTotalAssets, newHole);
+        return (feeShares, newTotalAssets, newLostAssets);
     }
 
-    function _newTotalAssetsAndHole() internal view returns (uint256, uint256) {
+    /// @dev Computes are returns the new total assets and the new lost assets.
+    /// @return newTotalAssets
+    /// @return newLostAssets
+    function _newTotalAndLostAssets() internal view returns (uint256, uint256) {
         uint256 realTotalAssets;
         for (uint256 i; i < withdrawQueue.length; ++i) {
             realTotalAssets += MORPHO.expectedSupplyAssets(_marketParams(withdrawQueue[i]), address(this));
         }
 
         // Handle the case where the vault lost some assets.
-        uint256 newHole;
-        if (realTotalAssets < lastTotalAssets - hole) newHole = lastTotalAssets - realTotalAssets;
-        else newHole = hole;
+        uint256 newLostAssets;
+        if (realTotalAssets < lastTotalAssets - lostAssets) newLostAssets = lastTotalAssets - realTotalAssets;
+        else newLostAssets = lostAssets;
 
-        uint256 newTotalAssets = realTotalAssets + newHole;
+        uint256 newTotalAssets = realTotalAssets + newLostAssets;
 
-        return (newTotalAssets, newHole);
+        return (newTotalAssets, newLostAssets);
     }
 }

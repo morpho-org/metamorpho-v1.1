@@ -6,7 +6,7 @@ methods {
 
     // We assume that the following functions are envfree, meaning don't depend on 
     // tx, sender and block.
-    function hole() external returns(uint256) envfree;
+    function lostAssets() external returns(uint256) envfree;
     function totalAssets() external returns(uint256) envfree;
     function totalSupply() external returns(uint256) envfree;
     function lastTotalAssets() external returns(uint256) envfree;
@@ -34,5 +34,5 @@ methods {
 }
 
 // TODO: this rule is timing out
-invariant holeSmallerThanLastTotalAssets()
-    hole() <= lastTotalAssets();
+invariant lostAssetsSmallerThanLastTotalAssets()
+    lostAssets() <= lastTotalAssets();

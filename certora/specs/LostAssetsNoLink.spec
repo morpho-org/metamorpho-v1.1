@@ -6,7 +6,7 @@ methods {
 
     // We assume that the following functions are envfree, meaning don't depend on 
     // tx, sender and block.
-    function hole() external returns(uint256) envfree;
+    function lostAssets() external returns(uint256) envfree;
     function totalAssets() external returns(uint256) envfree;
     function totalSupply() external returns(uint256) envfree;
     function lastTotalAssets() external returns(uint256) envfree;
@@ -30,14 +30,14 @@ methods {
     function _.onMorphoFlashLoan(uint256, bytes) external => NONDET;
 }
 
-rule holeIncreases(method f, env e, calldataarg args) {
-    uint256 holeBefore = hole();
+rule lostAssetsIncreases(method f, env e, calldataarg args) {
+    uint256 lostAssetsBefore = lostAssets();
 
     f(e, args);
 
-    uint256 holeAfter = hole();
+    uint256 lostAssetsAfter = lostAssets();
 
-    assert holeBefore <= holeAfter;
+    assert lostAssetsBefore <= lostAssetsAfter;
 }
 
 rule lastTotalAssetsSmallerThanTotalAssets() {
@@ -87,7 +87,7 @@ ghost mathint sumBalances {
 }
 
 hook Sstore _balances[KEY address user] uint256 newBalance (uint256 oldBalance) {
-    sumBalances = sumBalances + newBalance - oldBalance;
+    sumBalances = sumBalances - oldBalance + newBalance;
 }
 
 invariant totalIsSumBalances()

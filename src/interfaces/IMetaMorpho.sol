@@ -76,7 +76,7 @@ interface IMetaMorphoBase {
     function lastTotalAssets() external view returns (uint256);
 
     /// @notice Stores the missing assets due to bad debt.
-    function hole() external view returns (uint256);
+    function lostAssets() external view returns (uint256);
 
     /// @notice Submits a `newTimelock`.
     /// @dev Warning: Reverts if a timelock is already pending. Revoke the pending timelock to overwrite it.

@@ -30,8 +30,8 @@ jobs:
           - Roles
           - Timelock
           - Tokens
-          - HoleNoLink
-          - HoleLink
+          - LostAssetsNoLink
+          - LostAssetsLink
 
     steps:
       - uses: actions/checkout@v4

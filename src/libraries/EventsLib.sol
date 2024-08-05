@@ -40,8 +40,8 @@ library EventsLib {
     /// @notice Emitted when the vault's last total assets is updated to `updatedTotalAssets`.
     event UpdateLastTotalAssets(uint256 updatedTotalAssets);
 
-    /// @notice Emitted when the vault's hole is updated to `updatedHole`.
-    event UpdateHole(uint256 updatedHole);
+    /// @notice Emitted when the vault's lostAssets is updated to `updatedLostAssets`.
+    event UpdateLostAssets(uint256 updatedLostAssets);
 
     /// @notice Emitted when the market identified by `id` is submitted for removal.
     event SubmitMarketRemoval(address indexed caller, Id indexed id);
