@@ -870,8 +870,8 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
         emit EventsLib.UpdateLastTotalAssets(updatedTotalAssets);
     }
 
-    /// @dev Accrues the fee and mints the fee shares to the fee recipient.
-    function _accrueInterest() internal returns (uint256) {
+    /// @dev Accrues `lastTotalAssets`, `lostAssets` and mints the fee shares to the fee recipient.
+    function _accrueInterest() internal {
         (uint256 feeShares, uint256 newTotalAssets, uint256 newLostAssets) = _accruedSupplyAndAssets();
 
         _updateLastTotalAssets(newTotalAssets);
@@ -881,14 +881,12 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
         if (feeShares != 0) _mint(feeRecipient, feeShares);
 
         emit EventsLib.AccrueInterest(newTotalAssets, feeShares);
-
-        return newTotalAssets;
     }
 
-    /// @dev TODO.
-    /// @return newTotalAssets
-    /// @return newTotalSupply
-    /// @return lostAssets
+    /// @dev Computes and return the feeShares to mint, the new totalAssets and the new lostAssets.
+    /// @return feeShares the shares to mint to `feeRecipient`.
+    /// @return newTotalAssets the new totalSupply.
+    /// @return newLostAssets the new lostAssets.
     function _accruedSupplyAndAssets() internal view returns (uint256, uint256, uint256) {
         uint256 realTotalAssets;
         for (uint256 i; i < withdrawQueue.length; ++i) {
