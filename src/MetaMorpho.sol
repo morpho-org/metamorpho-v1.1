@@ -883,7 +883,7 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
         emit EventsLib.AccrueInterest(newTotalAssets, feeShares);
     }
 
-    /// @dev Computes and return the feeShares to mint, the new totalAssets and the new lostAssets.
+    /// @dev Computes and returns the `feeShares` to mint, the new `totalAssets` and the new `lostAssets`.
     /// @return feeShares the shares to mint to `feeRecipient`.
     /// @return newTotalAssets the new totalSupply.
     /// @return newLostAssets the new lostAssets.

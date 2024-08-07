@@ -75,7 +75,7 @@ interface IMetaMorphoBase {
     /// triggered (deposit/mint/withdraw/redeem/setFee/setFeeRecipient).
     function lastTotalAssets() external view returns (uint256);
 
-    /// @notice Stores the missing assets due to realised bad debt.
+    /// @notice Stores the missing assets due to realized bad debt.
     function lostAssets() external view returns (uint256);
 
     /// @notice Submits a `newTimelock`.
