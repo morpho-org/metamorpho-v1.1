@@ -39,6 +39,12 @@ contract LostAssetsTest is IntegrationTest {
         _sortSupplyQueueIdleLast();
     }
 
+    function test_writeTotalSupplyAssets(bytes32 id, uint128 newValue) public {
+        _writeTotalSupplyAssets(id, newValue);
+
+        assertEq(morpho.market(Id.wrap(id)).totalSupplyAssets, newValue);
+    }
+
     function test_totalAssetsDecrease(uint256 assets, uint128 expectedLostAssets) public {
         assets = bound(assets, MIN_TEST_ASSETS, MAX_TEST_ASSETS);
 
@@ -167,21 +173,6 @@ contract LostAssetsTest is IntegrationTest {
         assertEq(vault.lostAssets(), expectedLostAssets, "totalAssets decreased");
     }
 
-    function test_maxWithdrawWithLostAssets() public {
-        loanToken.setBalance(SUPPLIER, 1 ether);
-
-        vm.prank(SUPPLIER);
-        vault.deposit(1 ether, ONBEHALF);
-
-        assertEq(vault.maxWithdraw(ONBEHALF), 1 ether);
-
-        _writeTotalSupplyAssets(Id.unwrap(allMarkets[0].id()), 0.5 ether);
-
-        vault.deposit(0, ONBEHALF); // update lostAssets.
-
-        assertEq(vault.maxWithdraw(ONBEHALF), 0.5 ether);
-    }
-
     function test_maxWithdrawWithLostAssets(uint256 assets, uint128 expectedLostAssets) public {
         assets = bound(assets, MIN_TEST_ASSETS, MAX_TEST_ASSETS);
 
@@ -191,7 +182,7 @@ contract LostAssetsTest is IntegrationTest {
         vault.deposit(assets, ONBEHALF);
 
         uint128 totalSupplyAssetsBefore = morpho.market(allMarkets[0].id()).totalSupplyAssets;
-        expectedLostAssets = uint128(bound(expectedLostAssets, 0, totalSupplyAssetsBefore));
+        expectedLostAssets = uint128(bound(expectedLostAssets, 1, totalSupplyAssetsBefore));
 
         assertEq(vault.maxWithdraw(ONBEHALF), totalSupplyAssetsBefore);
 
@@ -200,5 +191,35 @@ contract LostAssetsTest is IntegrationTest {
         vault.deposit(0, ONBEHALF); // update lostAssets.
 
         assertEq(vault.maxWithdraw(ONBEHALF), totalSupplyAssetsBefore - expectedLostAssets);
+    }
+
+    function test_interestAccrualWithLostAssets(uint256 assets, uint128 expectedLostAssets, uint128 interest) public {
+        expectedLostAssets = test_lostAssetsValue(assets, expectedLostAssets);
+
+        uint128 totalSupplyAssetsBefore = morpho.market(allMarkets[0].id()).totalSupplyAssets;
+        interest = uint128(bound(interest, 1, type(uint128).max - totalSupplyAssetsBefore));
+
+        _writeTotalSupplyAssets(Id.unwrap(allMarkets[0].id()), totalSupplyAssetsBefore + interest);
+
+        uint256 expectedTotalAssets = morpho.expectedSupplyAssets(allMarkets[0], address(vault));
+        uint256 totalAssetsAfter = vault.totalAssets();
+
+        assertEq(totalAssetsAfter, expectedTotalAssets + expectedLostAssets);
+    }
+
+    function test_donationWithLostAssets(uint256 assets, uint128 expectedLostAssets, uint256 donation) public {
+        expectedLostAssets = test_lostAssetsValue(assets, expectedLostAssets);
+
+        donation = bound(donation, MIN_TEST_ASSETS, MAX_TEST_ASSETS);
+
+        uint256 totalAssetsBefore = vault.totalAssets();
+
+        loanToken.setBalance(SUPPLIER, donation);
+        vm.prank(SUPPLIER);
+        vault.deposit(donation, address(vault));
+
+        uint256 totalAssetsAfter = vault.totalAssets();
+
+        assertEq(totalAssetsAfter, totalAssetsBefore + donation);
     }
 }
