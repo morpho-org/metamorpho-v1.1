@@ -222,4 +222,48 @@ contract LostAssetsTest is IntegrationTest {
 
         assertEq(totalAssetsAfter, totalAssetsBefore + donation);
     }
+
+    function test_forcedMarketRemoval(uint256 assets0, uint256 assets1) public {
+        assets0 = bound(assets0, MIN_TEST_ASSETS, MAX_TEST_ASSETS);
+        assets1 = bound(assets1, MIN_TEST_ASSETS, MAX_TEST_ASSETS);
+
+        _setCap(allMarkets[0], type(uint128).max);
+        Id[] memory supplyQueue = new Id[](1);
+        supplyQueue[0] = allMarkets[0].id();
+        vm.prank(CURATOR);
+        vault.setSupplyQueue(supplyQueue);
+
+        loanToken.setBalance(SUPPLIER, assets0);
+        vm.prank(SUPPLIER);
+        vault.deposit(assets0, address(vault));
+
+        _setCap(allMarkets[1], type(uint128).max);
+        supplyQueue[0] = allMarkets[1].id();
+        vm.prank(CURATOR);
+        vault.setSupplyQueue(supplyQueue);
+
+        loanToken.setBalance(SUPPLIER, assets1);
+        vm.prank(SUPPLIER);
+        vault.deposit(assets1, address(vault));
+
+        _setCap(allMarkets[0], 0);
+        vm.prank(CURATOR);
+        vault.submitMarketRemoval(allMarkets[0]);
+        vm.warp(block.timestamp + vault.timelock());
+
+        uint256 totalAssetsBefore = vault.totalAssets();
+
+        uint256[] memory withdrawQueue = new uint256[](2);
+        withdrawQueue[0] = 0;
+        withdrawQueue[1] = 2;
+        vm.prank(CURATOR);
+        vault.updateWithdrawQueue(withdrawQueue);
+
+        uint256 totalAssetsAfter = vault.totalAssets();
+
+        vault.deposit(0, ONBEHALF); // update lostAssets.
+
+        assertEq(totalAssetsBefore, totalAssetsAfter);
+        assertEq(vault.lostAssets(), assets0);
+    }
 }
