@@ -10,6 +10,7 @@ methods {
     function totalAssets() external returns(uint256) envfree;
     function totalSupply() external returns(uint256) envfree;
     function lastTotalAssets() external returns(uint256) envfree;
+    function realTotalAssets() external returns(uint256) envfree;
 
     // Assume that it's a constant.
     function DECIMALS_OFFSET() external returns(uint8) => CONSTANT;
@@ -36,3 +37,6 @@ methods {
 // TODO: this rule is timing out
 invariant lostAssetsSmallerThanLastTotalAssets()
     lostAssets() <= lastTotalAssets();
+
+invariant realPlusLostEqualsTotal()
+    realTotalAssets() + lostAssets() == to_mathint(totalAssets());

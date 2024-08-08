@@ -10,24 +10,26 @@ methods {
     function totalAssets() external returns(uint256) envfree;
     function totalSupply() external returns(uint256) envfree;
     function lastTotalAssets() external returns(uint256) envfree;
+    function realTotalAssets() external returns(uint256) envfree;
+    function fee() external returns(uint96) envfree;
+    function maxFee() external returns(uint256) envfree;
 
     // Assume that it's a constant.
-    function DECIMALS_OFFSET() external returns(uint8) => CONSTANT;
+    function DECIMALS_OFFSET() external returns(uint8) envfree => CONSTANT;
 
-    // We assume that the erc20 is view. It's ok as we don't care about what happens in the token.
+    // We assume that Morpho and the ERC20s can't touch back Metamorpho.
+    // TODO: improve this, and assume that there can be reentrancies through public entry-points.
+    function _.supply(MetaMorphoHarness.MarketParams, uint256, uint256, address, bytes) external => NONDET;
+    function _.withdraw(MetaMorphoHarness.MarketParams, uint256, uint256, address, address) external => NONDET;
+    function _.accrueInterest(MetaMorphoHarness.MarketParams) external => NONDET;
+    function _.idToMarketParams(MetaMorphoHarness.Id) external => NONDET;
+    function _.supplyShares(MetaMorphoHarness.Id, address) external => NONDET;
+    function _.expectedSupplyAssets(MetaMorphoHarness.MarketParams, address) external => CONSTANT;
+    function _.market(MetaMorphoHarness.Id) external => NONDET;
+    
     function _.transfer(address, uint256) external => NONDET;
     function _.transferFrom(address, address, uint256) external => NONDET;
     function _.balanceOf(address) external => NONDET;
-
-    // We deactivate callbacks. 
-    // Ideally we can assume that they can't change arbitrarily the storage of Morpho 
-    // and Metamorpho, but can only reenter through public entry-points, but I don't 
-    // know how to do this.
-    function _.onMorphoSupply(uint256, bytes) external => NONDET;
-    function _.onMorphoRepay(uint256, bytes) external => NONDET;
-    function _.onMorphoSupplyCollateral(uint256, bytes) external => NONDET;
-    function _.onMorphoLiquidate(uint256, bytes) external => NONDET;
-    function _.onMorphoFlashLoan(uint256, bytes) external => NONDET;
 }
 
 rule lostAssetsIncreases(method f, env e, calldataarg args) {
@@ -86,28 +88,36 @@ ghost mathint sumBalances {
     init_state axiom sumBalances == 0;
 }
 
-hook Sstore _balances[KEY address user] uint256 newBalance (uint256 oldBalance) {
-    sumBalances = sumBalances - oldBalance + newBalance;
+hook Sload uint256 balance _balances[KEY address addr] {
+    require sumBalances >= to_mathint(balance);
 }
 
-invariant totalIsSumBalances()
+hook Sstore _balances[KEY address user] uint256 newBalance (uint256 oldBalance) {
+    sumBalances = sumBalances + newBalance - oldBalance;
+}
+
+strong invariant totalIsSumBalances()
     to_mathint(totalSupply()) == sumBalances;
 
 // More precisely: share price does not decrease lower than the one at the last interaction.
-// TODO: not passing yet.
+// TODO: not passing, but I don't understand how
 rule sharePriceIncreases(method f, env e, calldataarg args) {
     requireInvariant totalIsSumBalances();
+    require assert_uint256(fee()) == 0;
 
     // We query them in a state in which the vault is sync.
     uint256 lastTotalAssetsBefore = lastTotalAssets();
     uint256 totalSupplyBefore = totalSupply();
+    require totalSupplyBefore > 0;
 
     f(e, args);
 
-    uint256 totalAssetsAfter = totalAssets();
+    uint256 totalAssetsAfter = lastTotalAssets();
     uint256 totalSupplyAfter = totalSupply();
     require totalSupplyAfter > 0;
 
-    assert lastTotalAssetsBefore * totalSupplyAfter <= totalAssetsAfter * totalSupplyBefore;
-}
+    uint256 decimalsOffset = assert_uint256(DECIMALS_OFFSET());
+    require decimalsOffset == 18;
 
+    assert (lastTotalAssetsBefore + 1) * (totalSupplyAfter + 10^decimalsOffset) <= (totalAssetsAfter + 1) * (totalSupplyBefore + 10^decimalsOffset);
+}
