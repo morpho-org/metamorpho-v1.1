@@ -53,7 +53,7 @@ rule lostAssetsDecreasesOnCover(env e, uint256 assets) {
 
     uint256 lostAssetsAfter = lostAssets();
 
-    assert lostAssetsAfter == lostAssetsBefore - assets;
+    assert to_mathint(lostAssetsAfter) == lostAssetsBefore - assets;
 }
 
 rule lastTotalAssetsSmallerThanTotalAssets() {
