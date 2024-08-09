@@ -35,6 +35,7 @@ import {
     Math,
     SafeERC20
 } from "../lib/openzeppelin-contracts/contracts/token/ERC20/extensions/ERC4626.sol";
+import {console} from "forge-std/console.sol";
 
 /// @title MetaMorpho
 /// @author Morpho Labs
@@ -186,6 +187,32 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
     }
 
     /* ONLY OWNER FUNCTIONS */
+
+    /// @inheritdoc IMetaMorphoBase
+    function setName(string calldata newName) external onlyOwner {
+        uint256 length = bytes(newName).length;
+        if (length > 31) revert ErrorsLib.StringTooLong();
+
+        uint256 slot = ConstantsLib.NAME_SLOT;
+        bytes32 value = bytes32(bytes(newName));
+
+        assembly {
+            sstore(slot, or(value, mul(length, 2)))
+        }
+    }
+
+    /// @inheritdoc IMetaMorphoBase
+    function setSymbol(string calldata newSymbol) external onlyOwner {
+        uint256 length = bytes(newSymbol).length;
+        if (length > 31) revert ErrorsLib.StringTooLong();
+
+        uint256 slot = ConstantsLib.SYMBOL_SLOT;
+        bytes32 value = bytes32(bytes(newSymbol));
+
+        assembly {
+            sstore(slot, or(value, mul(length, 2)))
+        }
+    }
 
     /// @inheritdoc IMetaMorphoBase
     function setCurator(address newCurator) external onlyOwner {

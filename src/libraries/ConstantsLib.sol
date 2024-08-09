@@ -17,4 +17,10 @@ library ConstantsLib {
 
     /// @dev The maximum fee the vault can have (50%).
     uint256 internal constant MAX_FEE = 0.5e18;
+
+    /// @dev Storage slot of the name.
+    uint256 internal constant NAME_SLOT = 3;
+
+    /// @dev Storage slot of the symbol.
+    uint256 internal constant SYMBOL_SLOT = 4;
 }

@@ -95,4 +95,7 @@ library ErrorsLib {
 
     /// @notice Thrown when all caps have been reached.
     error AllCapsReached();
+
+    /// @notice Thrown when trying to set a string that is too long.
+    error StringTooLong();
 }
