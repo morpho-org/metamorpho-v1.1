@@ -266,4 +266,40 @@ contract LostAssetsTest is IntegrationTest {
         assertEq(totalAssetsBefore, totalAssetsAfter);
         assertEq(vault.lostAssets(), assets0);
     }
+
+    /// Cover.
+
+    function test_cover(uint256 assets, uint128 lostAssets, uint256 covered) external {
+        lostAssets = test_lostAssetsValue(assets, lostAssets);
+
+        covered = bound(covered, 0, lostAssets);
+
+        loanToken.setBalance(address(this), covered);
+        vault.coverLostAssets(covered);
+
+        assertEq(vault.lostAssets(), lostAssets - covered);
+    }
+
+    function test_coverEvent(uint256 assets, uint128 lostAssets, uint256 covered) external {
+        lostAssets = test_lostAssetsValue(assets, lostAssets);
+
+        covered = bound(covered, 0, lostAssets);
+
+        loanToken.setBalance(address(this), covered);
+
+        vm.expectEmit();
+        emit EventsLib.UpdateLostAssets(lostAssets - covered);
+        vault.coverLostAssets(covered);
+    }
+
+    function test_coverError(uint256 assets, uint128 lostAssets, uint256 covered) external {
+        lostAssets = test_lostAssetsValue(assets, lostAssets);
+
+        covered = bound(covered, lostAssets + 1, type(uint128).max);
+
+        loanToken.setBalance(address(this), covered);
+
+        vm.expectRevert(stdError.arithmeticError);
+        vault.coverLostAssets(covered);
+    }
 }

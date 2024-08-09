@@ -178,6 +178,10 @@ interface IMetaMorphoBase {
     /// @dev A supply in a reallocation step will make the reallocation revert if the amount is greater than the net
     /// amount from previous steps (i.e. total withdrawn minus total supplied).
     function reallocate(MarketAllocation[] calldata allocations) external;
+
+    /// @notice Give assets to the vault to cover the lost assets due to bad debt realisation or forced market removal.
+    /// @param assets The amount of assets to give.
+    function coverLostAssets(uint256 assets) external;
 }
 
 /// @dev This interface is inherited by MetaMorpho so that function signatures are checked by the compiler.
