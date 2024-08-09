@@ -179,8 +179,8 @@ interface IMetaMorphoBase {
     /// amount from previous steps (i.e. total withdrawn minus total supplied).
     function reallocate(MarketAllocation[] calldata allocations) external;
 
-    /// @notice Give assets to the vault to cover the lost assets due to bad debt realisation or forced market removal.
-    /// @param assets The amount of assets to give.
+    /// @notice Sends assets to the vault to cover the lost assets due to bad debt realization or forced market removal.
+    /// @param assets The amount of assets to send.
     function coverLostAssets(uint256 assets) external;
 }
 

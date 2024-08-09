@@ -577,6 +577,7 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
         return newTotalAssets;
     }
 
+    /// @inheritdoc IMetaMorphoBase
     function coverLostAssets(uint256 assets) external {
         _accrueInterest();
 
