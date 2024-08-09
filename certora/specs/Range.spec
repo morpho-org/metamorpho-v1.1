@@ -23,7 +23,6 @@ methods {
     function isAllocator(address) external returns(bool) envfree;
     function skimRecipient() external returns(address) envfree;
 
-    function minTimelock() external returns(uint256) envfree;
     function maxTimelock() external returns(uint256) envfree;
     function maxQueueLength() external returns(uint256) envfree;
     function maxFee() external returns(uint256) envfree;
@@ -33,17 +32,16 @@ function isPendingTimelockInRange() returns bool {
     MetaMorphoHarness.PendingUint192 pendingTimelock = pendingTimelock_();
 
     return pendingTimelock.validAt != 0 =>
-        assert_uint256(pendingTimelock.value) <= maxTimelock() &&
-        assert_uint256(pendingTimelock.value) >= minTimelock();
+        assert_uint256(pendingTimelock.value) <= maxTimelock();
 }
 
-// Check that the pending timelock is bounded by the min timelock and the max timelock.
+// Check that the pending timelock is bounded by the max timelock.
 invariant pendingTimelockInRange()
     isPendingTimelockInRange();
 
-// Check that the timelock is bounded by the min timelock and the max timelock.
+// Check that the timelock is bounded by the max timelock.
 invariant timelockInRange()
-    timelock() <= maxTimelock() && timelock() >= minTimelock()
+    timelock() <= maxTimelock()
 {
     preserved {
         requireInvariant pendingTimelockInRange();
