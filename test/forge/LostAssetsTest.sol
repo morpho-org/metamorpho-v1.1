@@ -272,12 +272,15 @@ contract LostAssetsTest is IntegrationTest {
     function test_cover(uint256 assets, uint128 lostAssets, uint256 covered) external {
         lostAssets = test_lostAssetsValue(assets, lostAssets);
 
+        uint256 totalAssetsBefore = vault.totalAssets();
+
         covered = bound(covered, 0, lostAssets);
 
         loanToken.setBalance(address(this), covered);
         vault.coverLostAssets(covered);
 
         assertEq(vault.lostAssets(), lostAssets - covered);
+        assertEq(vault.totalAssets(), totalAssetsBefore);
     }
 
     function test_coverEvent(uint256 assets, uint128 lostAssets, uint256 covered) external {
