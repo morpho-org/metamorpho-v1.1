@@ -493,6 +493,18 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
         emit EventsLib.Skim(_msgSender(), token, amount);
     }
 
+    /// @inheritdoc IMetaMorphoBase
+    function coverLostAssets(uint256 assets) external {
+        _accrueInterest();
+
+        lostAssets -= assets;
+        emit EventsLib.UpdateLostAssets(lostAssets);
+
+        SafeERC20.safeTransferFrom(IERC20(asset()), msg.sender, address(this), assets);
+
+        _supplyMorpho(assets);
+    }
+
     /* ERC4626 (PUBLIC) */
 
     /// @inheritdoc IERC20Metadata
@@ -575,18 +587,6 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
         (, uint256 newTotalAssets,) = _accruedSupplyAndAssets();
 
         return newTotalAssets;
-    }
-
-    /// @inheritdoc IMetaMorphoBase
-    function coverLostAssets(uint256 assets) external {
-        _accrueInterest();
-
-        lostAssets -= assets;
-        emit EventsLib.UpdateLostAssets(lostAssets);
-
-        SafeERC20.safeTransferFrom(IERC20(asset()), msg.sender, address(this), assets);
-
-        _supplyMorpho(assets);
     }
 
     /* ERC4626 (INTERNAL) */
