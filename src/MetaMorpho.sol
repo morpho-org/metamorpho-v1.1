@@ -35,7 +35,6 @@ import {
     Math,
     SafeERC20
 } from "../lib/openzeppelin-contracts/contracts/token/ERC20/extensions/ERC4626.sol";
-import {console} from "forge-std/console.sol";
 
 /// @title MetaMorpho
 /// @author Morpho Labs
