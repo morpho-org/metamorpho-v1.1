@@ -5,8 +5,6 @@ import "./helpers/IntegrationTest.sol";
 
 contract DeploymentTest is IntegrationTest {
     function testSetName(string memory name) public {
-        vm.assume(bytes(name).length <= 31);
-
         vm.prank(OWNER);
         vault.setName(name);
 
@@ -14,42 +12,20 @@ contract DeploymentTest is IntegrationTest {
     }
 
     function testSetNameNotOwner(string memory name) public {
-        vm.assume(bytes(name).length <= 31);
-
         vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, address(this)));
         vault.setName(name);
-    }
-
-    function testSetNameTooLong(string memory name) public {
-        vm.assume(bytes(name).length > 31);
-
-        vm.expectRevert(ErrorsLib.StringTooLong.selector);
-        vm.prank(OWNER);
-        vault.setName(name);
-    }
-
-    function testSetSymbolNotOwner(string memory name) public {
-        vm.assume(bytes(name).length <= 31);
-
-        vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, address(this)));
-        vault.setName(name);
-    }
-
-    function testSetSymbolTooLong(string memory symbol) public {
-        vm.assume(bytes(symbol).length > 31);
-
-        vm.expectRevert(ErrorsLib.StringTooLong.selector);
-        vm.prank(OWNER);
-        vault.setName(symbol);
     }
 
     function testSetSymbol(string memory symbol) public {
-        vm.assume(bytes(symbol).length <= 31);
-
         vm.prank(OWNER);
         vault.setSymbol(symbol);
 
         assertEq(vault.symbol(), symbol);
+    }
+
+    function testSetSymbolNotOwner(string memory name) public {
+        vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, address(this)));
+        vault.setName(name);
     }
 
     function testDeployMetaMorphoAddresssZero() public {

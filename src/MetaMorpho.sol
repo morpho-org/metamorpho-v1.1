@@ -35,7 +35,6 @@ import {
     Math,
     SafeERC20
 } from "../lib/openzeppelin-contracts/contracts/token/ERC20/extensions/ERC4626.sol";
-import {console} from "forge-std/console.sol";
 
 /// @title MetaMorpho
 /// @author Morpho Labs
@@ -189,29 +188,13 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
     /* ONLY OWNER FUNCTIONS */
 
     /// @inheritdoc IMetaMorphoBase
-    function setName(string calldata newName) external onlyOwner {
-        uint256 length = bytes(newName).length;
-        if (length > 31) revert ErrorsLib.StringTooLong();
-
-        uint256 slot = ConstantsLib.NAME_SLOT;
-        bytes32 value = bytes32(bytes(newName));
-
-        assembly {
-            sstore(slot, or(value, mul(length, 2)))
-        }
+    function setName(string memory newName) external onlyOwner {
+        _setString(newName, ConstantsLib.NAME_SLOT);
     }
 
     /// @inheritdoc IMetaMorphoBase
-    function setSymbol(string calldata newSymbol) external onlyOwner {
-        uint256 length = bytes(newSymbol).length;
-        if (length > 31) revert ErrorsLib.StringTooLong();
-
-        uint256 slot = ConstantsLib.SYMBOL_SLOT;
-        bytes32 value = bytes32(bytes(newSymbol));
-
-        assembly {
-            sstore(slot, or(value, mul(length, 2)))
-        }
+    function setSymbol(string memory newSymbol) external onlyOwner {
+        _setString(newSymbol, ConstantsLib.SYMBOL_SLOT);
     }
 
     /// @inheritdoc IMetaMorphoBase
@@ -940,5 +923,29 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
         }
 
         return (feeShares, newTotalAssets, newLostAssets);
+    }
+
+    /* STRING HELPERS */
+
+    function _setString(string memory newValue, uint256 slot) internal {
+        uint256 length = bytes(newValue).length;
+
+        if (length <= 31) {
+            bytes32 value = bytes32(bytes(newValue));
+            assembly {
+                sstore(slot, or(value, mul(length, 2)))
+            }
+        } else {
+            assembly {
+                sstore(slot, add(mul(length, 2), 1))
+            }
+
+            uint256 firstValueSlot = uint256(keccak256(abi.encode(slot)));
+            for (uint256 k; k < length / 32 + 1; k++) {
+                assembly {
+                    sstore(add(firstValueSlot, k), mload(add(newValue, mul(32, add(k, 1)))))
+                }
+            }
+        }
     }
 }
