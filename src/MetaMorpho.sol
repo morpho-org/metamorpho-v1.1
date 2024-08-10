@@ -110,6 +110,9 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
     /// @inheritdoc IMetaMorphoBase
     uint256 public lostAssets;
 
+    string public __name;
+    string public __symbol;
+
     /* CONSTRUCTOR */
 
     /// @dev Initializes the contract.
@@ -126,8 +129,11 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
         address _asset,
         string memory _name,
         string memory _symbol
-    ) ERC4626(IERC20(_asset)) ERC20Permit(_name) ERC20(_name, _symbol) Ownable(owner) {
+    ) ERC4626(IERC20(_asset)) ERC20Permit("") ERC20("", "") Ownable(owner) {
         if (morpho == address(0)) revert ErrorsLib.ZeroAddress();
+
+        __name = _name;
+        __symbol = _symbol;
 
         MORPHO = IMorpho(morpho);
         DECIMALS_OFFSET = uint8(uint256(18).zeroFloorSub(IERC20Metadata(_asset).decimals()));
@@ -186,6 +192,14 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
     }
 
     /* ONLY OWNER FUNCTIONS */
+
+    function setName(string memory newName) external onlyOwner {
+        __name = newName;
+    }
+
+    function setSymbol(string memory newSymbol) external onlyOwner {
+        __symbol = newSymbol;
+    }
 
     /// @inheritdoc IMetaMorphoBase
     function setCurator(address newCurator) external onlyOwner {
@@ -498,6 +512,14 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
     /// @inheritdoc IERC20Metadata
     function decimals() public view override(ERC20, ERC4626) returns (uint8) {
         return ERC4626.decimals();
+    }
+
+    function name() public view override(IERC20Metadata, ERC20) returns (string memory) {
+        return __name;
+    }
+
+    function symbol() public view override(IERC20Metadata, ERC20) returns (string memory) {
+        return __symbol;
     }
 
     /// @inheritdoc IERC4626
