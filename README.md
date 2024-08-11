@@ -28,7 +28,7 @@ Those rewards can be transferred to the `skimRecipient`.
 The vault's owner has the choice to distribute back these rewards to vault depositors however they want.
 For more information about this use case, see the [Rewards](#rewards) section.
 
-All actions that may be against users' interests (e.g. enabling a market with a high exposure) can be subject to a timelock.
+All actions that may be against users' interests (e.g. enabling a market with a high exposure) can be subject to a timelock of up to two weeks.
 The `owner`, or the `guardian` if set, can revoke the action during the timelock.
 After the timelock, the action can be executed by anyone.
 
