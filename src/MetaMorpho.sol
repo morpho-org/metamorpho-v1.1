@@ -110,8 +110,11 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
     /// @inheritdoc IMetaMorphoBase
     uint256 public lostAssets;
 
-    string public __name;
-    string public __symbol;
+    /// @dev "Overrides" the ERC20's storage variable to be able to modify it.
+    string private _name;
+
+    /// @dev "Overrides" the ERC20's storage variable to be able to modify it.
+    string private _symbol;
 
     /* CONSTRUCTOR */
 
@@ -120,20 +123,24 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
     /// @param morpho The address of the Morpho contract.
     /// @param initialTimelock The initial timelock.
     /// @param _asset The address of the underlying asset.
-    /// @param _name The name of the vault.
-    /// @param _symbol The symbol of the vault.
+    /// @param __name The name of the vault.
+    /// @param __symbol The symbol of the vault.
+    /// @dev We pass "" as name and symbol to the ERC20 because these are overriden in this contract.
     constructor(
         address owner,
         address morpho,
         uint256 initialTimelock,
         address _asset,
-        string memory _name,
-        string memory _symbol
+        string memory __name,
+        string memory __symbol
     ) ERC4626(IERC20(_asset)) ERC20Permit("") ERC20("", "") Ownable(owner) {
         if (morpho == address(0)) revert ErrorsLib.ZeroAddress();
 
-        __name = _name;
-        __symbol = _symbol;
+        _name = __name;
+        emit EventsLib.SetName(__name);
+
+        _symbol = __symbol;
+        emit EventsLib.SetSymbol(__symbol);
 
         MORPHO = IMorpho(morpho);
         DECIMALS_OFFSET = uint8(uint256(18).zeroFloorSub(IERC20Metadata(_asset).decimals()));
@@ -194,11 +201,15 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
     /* ONLY OWNER FUNCTIONS */
 
     function setName(string memory newName) external onlyOwner {
-        __name = newName;
+        _name = newName;
+
+        emit EventsLib.SetName(newName);
     }
 
     function setSymbol(string memory newSymbol) external onlyOwner {
-        __symbol = newSymbol;
+        _symbol = newSymbol;
+
+        emit EventsLib.SetSymbol(newSymbol);
     }
 
     /// @inheritdoc IMetaMorphoBase
@@ -515,11 +526,11 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
     }
 
     function name() public view override(IERC20Metadata, ERC20) returns (string memory) {
-        return __name;
+        return _name;
     }
 
     function symbol() public view override(IERC20Metadata, ERC20) returns (string memory) {
-        return __symbol;
+        return _symbol;
     }
 
     /// @inheritdoc IERC4626

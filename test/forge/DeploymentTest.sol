@@ -11,6 +11,13 @@ contract DeploymentTest is IntegrationTest {
         assertEq(vault.name(), name);
     }
 
+    function testSetNameEvent(string memory name) public {
+        vm.expectEmit();
+        emit EventsLib.SetName(name);
+        vm.prank(OWNER);
+        vault.setName(name);
+    }
+
     function testSetNameNotOwner(string memory name) public {
         vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, address(this)));
         vault.setName(name);
@@ -21,6 +28,13 @@ contract DeploymentTest is IntegrationTest {
         vault.setSymbol(symbol);
 
         assertEq(vault.symbol(), symbol);
+    }
+
+    function testSetSymbolEvent(string memory symbol) public {
+        vm.expectEmit();
+        emit EventsLib.SetSymbol(symbol);
+        vm.prank(OWNER);
+        vault.setSymbol(symbol);
     }
 
     function testSetSymbolNotOwner(string memory name) public {
