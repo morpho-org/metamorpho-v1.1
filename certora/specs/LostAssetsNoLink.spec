@@ -1,11 +1,8 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 methods {
-    // TODO: why do we need to do this?
     function multicall(bytes[]) external returns(bytes[]) => NONDET DELETE;
 
-    // We assume that the following functions are envfree, meaning don't depend on 
-    // tx, sender and block.
     function lostAssets() external returns(uint256) envfree;
     function totalAssets() external returns(uint256) envfree;
     function totalSupply() external returns(uint256) envfree;
@@ -13,9 +10,6 @@ methods {
     function realTotalAssets() external returns(uint256) envfree;
     function fee() external returns(uint96) envfree;
     function maxFee() external returns(uint256) envfree;
-
-    // Assume that it's a constant.
-    function DECIMALS_OFFSET() external returns(uint8) envfree => CONSTANT;
 
     // We assume that Morpho and the ERC20s can't touch back Metamorpho.
     // TODO: improve this, and assume that there can be reentrancies through public entry-points.
