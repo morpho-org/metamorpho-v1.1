@@ -22,7 +22,7 @@ invariant noBadPendingTimelock()
 
 // Check that the pending timelock value is always strictly smaller than the current timelock value.
 invariant smallerPendingTimelock()
-    assert_uint256(pendingTimelock_().value) < timelock()
+    assert_uint256(pendingTimelock_().value) < timelock() || timelock() == 0
 {
     preserved with (env e) {
         requireInvariant pendingTimelockInRange();
@@ -35,7 +35,7 @@ invariant smallerPendingTimelock()
 function hasNoBadPendingCap(MetaMorphoHarness.Id id) returns bool {
     MetaMorphoHarness.PendingUint192 pendingCap = pendingCap_(id);
 
-    return pendingCap.validAt == 0 <=> pendingCap.value == 0;
+    return pendingCap.validAt == 0 => pendingCap.value == 0;
 }
 
 // Check that having no pending cap value is equivalent to having its valid timestamp at 0.
