@@ -15,6 +15,8 @@ invariant noBadPendingTimelock()
         requireInvariant timelockInRange();
         // Safe require as it corresponds to some time very far into the future.
         require e.block.timestamp < 2^63;
+        // Safe require as it corresponds to some time very far into the past.
+        require e.block.timestamp > 0;
     }
 }
 
@@ -22,9 +24,11 @@ invariant noBadPendingTimelock()
 invariant smallerPendingTimelock()
     assert_uint256(pendingTimelock_().value) < timelock()
 {
-    preserved {
+    preserved with (env e) {
         requireInvariant pendingTimelockInRange();
         requireInvariant timelockInRange();
+        // Safe require as it corresponds to some time very far into the past.
+        require e.block.timestamp > 0;
     }
 }
 
@@ -73,6 +77,8 @@ invariant noBadPendingGuardian()
         requireInvariant timelockInRange();
         // Safe require as it corresponds to some time very far into the future.
         require e.block.timestamp < 2^63;
+        // Safe require as it corresponds to some time very far into the past.
+        require e.block.timestamp > 0;
     }
 }
 
