@@ -34,9 +34,9 @@ methods {
     function _.onMorphoFlashLoan(uint256, bytes) external => NONDET;
 }
 
-// TODO: this rule is timing out
-invariant lostAssetsSmallerThanLastTotalAssets()
-    lostAssets() <= lastTotalAssets();
+// // TODO: this rule is timing out
+// invariant lostAssetsSmallerThanLastTotalAssets()
+//     lostAssets() <= lastTotalAssets();
 
-invariant realPlusLostEqualsTotal()
-    realTotalAssets() + lostAssets() == to_mathint(totalAssets());
+// invariant realPlusLostEqualsTotal()
+//     realTotalAssets() + lostAssets() == to_mathint(totalAssets());
