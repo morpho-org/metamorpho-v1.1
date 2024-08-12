@@ -4,7 +4,7 @@ import "Range.spec";
 function hasNoBadPendingTimelock() returns bool {
     MetaMorphoHarness.PendingUint192 pendingTimelock = pendingTimelock_();
 
-    return pendingTimelock.validAt == 0 <=> pendingTimelock.value == 0;
+    return pendingTimelock.validAt == 0 => pendingTimelock.value == 0;
 }
 
 // Check that having no pending timelock value is equivalent to having its valid timestamp at 0.
