@@ -42,6 +42,8 @@ invariant noBadPendingCap(MetaMorphoHarness.Id id)
         requireInvariant timelockInRange();
         // Safe require as it corresponds to some time very far into the future.
         require e.block.timestamp < 2^63;
+        // Safe require as it corresponds to some time very far into the past.
+        require e.block.timestamp > 0;
     }
 }
 
