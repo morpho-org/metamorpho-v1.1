@@ -10,6 +10,7 @@ methods {
     function realTotalAssets() external returns(uint256) envfree;
     function fee() external returns(uint96) envfree;
     function maxFee() external returns(uint256) envfree;
+    function DECIMALS_OFFSET() external returns(uint8) envfree;
 
     // We assume that Morpho and the ERC20s can't touch back Metamorpho.
     // TODO: improve this, and assume that there can be reentrancies through public entry-points.
@@ -24,6 +25,19 @@ methods {
     function _.transfer(address, uint256) external => NONDET;
     function _.transferFrom(address, address, uint256) external => NONDET;
     function _.balanceOf(address) external => NONDET;
+
+    // Summarise mulDiv because its implementation is too complex.
+    function _.mulDiv(uint256 x, uint256 y, uint256 denominator, Math.Rounding rounding) internal => summaryMulDiv(x, y, denominator, rounding) expect (uint256);
+}
+
+function summaryMulDiv(uint256 x, uint256 y, uint256 d, Math.Rounding rounding) returns uint256 {
+    if (rounding == Math.Rounding.Floor) {
+        // Safe require because the reference implementation would revert.
+        return require_uint256((x * y) / d);
+    } else {
+        // Safe require because the reference implementation would revert.
+        return require_uint256((x * y + (d - 1)) / d);
+    }
 }
 
 rule lostAssetsIncreases(method f, env e, calldataarg args) {
@@ -93,25 +107,25 @@ hook Sstore _balances[KEY address user] uint256 newBalance (uint256 oldBalance) 
 strong invariant totalIsSumBalances()
     to_mathint(totalSupply()) == sumBalances;
 
-// // More precisely: share price does not decrease lower than the one at the last interaction.
-// // TODO: not passing, but I don't understand how
-// rule sharePriceIncreases(method f, env e, calldataarg args) {
-//     requireInvariant totalIsSumBalances();
-//     require assert_uint256(fee()) == 0;
+// More precisely: share price does not decrease lower than the one at the last interaction.
+// TODO: not passing, but I don't understand how
+rule sharePriceIncreases(method f, env e, calldataarg args) {
+    requireInvariant totalIsSumBalances();
+    require assert_uint256(fee()) == 0;
 
-//     // We query them in a state in which the vault is sync.
-//     uint256 lastTotalAssetsBefore = lastTotalAssets();
-//     uint256 totalSupplyBefore = totalSupply();
-//     require totalSupplyBefore > 0;
+    // We query them in a state in which the vault is sync.
+    uint256 lastTotalAssetsBefore = lastTotalAssets();
+    uint256 totalSupplyBefore = totalSupply();
+    require totalSupplyBefore > 0;
 
-//     f(e, args);
+    f(e, args);
 
-//     uint256 totalAssetsAfter = lastTotalAssets();
-//     uint256 totalSupplyAfter = totalSupply();
-//     require totalSupplyAfter > 0;
+    uint256 totalAssetsAfter = lastTotalAssets();
+    uint256 totalSupplyAfter = totalSupply();
+    require totalSupplyAfter > 0;
 
-//     uint256 decimalsOffset = assert_uint256(DECIMALS_OFFSET());
-//     require decimalsOffset == 18;
+    uint256 decimalsOffset = assert_uint256(DECIMALS_OFFSET());
+    require decimalsOffset == 18;
 
-//     assert (lastTotalAssetsBefore + 1) * (totalSupplyAfter + 10^decimalsOffset) <= (totalAssetsAfter + 1) * (totalSupplyBefore + 10^decimalsOffset);
-// }
+    assert (lastTotalAssetsBefore + 1) * (totalSupplyAfter + 10^decimalsOffset) <= (totalAssetsAfter + 1) * (totalSupplyBefore + 10^decimalsOffset);
+}
