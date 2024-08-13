@@ -22,6 +22,8 @@ jobs:
           - Immutability
           - LastUpdated
           - Liveness
+          - LostAssetsLink
+          - LostAssetsNoLink
           - MarketInteractions
           - PendingValues
           - Range
@@ -30,8 +32,6 @@ jobs:
           - Roles
           - Timelock
           - Tokens
-          - LostAssetsNoLink
-          - LostAssetsLink
 
     steps:
       - uses: actions/checkout@v4
