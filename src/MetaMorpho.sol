@@ -892,7 +892,7 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
     /// @dev Computes and returns the fee shares (`feeShares`) to mint and the new vault's total assets
     /// (`newTotalAssets`).
     function _accruedFeeShares() internal view returns (uint256 feeShares, uint256 newTotalAssets) {
-        newTotalAssets = totalAssets();
+        newTotalAssets = Math.max(totalAssets(), lastTotalAssets);
 
         uint256 totalInterest = newTotalAssets.zeroFloorSub(lastTotalAssets);
         if (totalInterest != 0 && fee != 0) {
