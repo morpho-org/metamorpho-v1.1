@@ -24,8 +24,9 @@ methods {
     function _.transferFrom(address, address, uint256) external => NONDET;
     function _.balanceOf(address) external => NONDET;
 
-    // We assume that the borrow rate is view.
+    // We assume that the IRM and oracle are view.
     function _.borrowRate(MorphoHarness.MarketParams, MorphoHarness.Market) external => NONDET;
+    function _.price() external => NONDET;
 
     // We deactivate callbacks.
     // Ideally we can assume that they can't change arbitrarily the storage of Morpho
@@ -97,13 +98,14 @@ invariant realPlusLostEqualsTotal()
     realTotalAssets() + newLostAssets() == to_mathint(totalAssets());
 
 
+// LostAssets can only change after some bad debt has been realised or a market has been forced removed.
 rule lostAssetsOnlyMovesAfterUpdateWQueueAndLiquidate(method f, env e, calldataarg args)
 filtered {
     f -> f.selector != sig:MorphoHarness.liquidate(MorphoHarness.MarketParams, address, uint256, uint256, bytes).selector &&
         f.selector != sig:updateWithdrawQueue(uint256[]).selector
 }
 {
-    uint256 lostAssetsBefore = lostAssets();
+    uint256 lostAssetsBefore = newLostAssets();
 
     f(e, args);
 
