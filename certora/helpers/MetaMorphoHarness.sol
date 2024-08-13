@@ -82,11 +82,21 @@ contract MetaMorphoHarness is MetaMorpho {
         if (removableAt != 0) nextTime = Math.min(nextTime, removableAt);
     }
 
-    function realTotalAssets() external view returns (uint256) {
+    function realTotalAssets() public view returns (uint256) {
         uint256 realTotalAssets;
         for (uint256 i; i < withdrawQueue.length; ++i) {
             realTotalAssets += MORPHO.expectedSupplyAssets(_marketParams(withdrawQueue[i]), address(this));
         }
         return realTotalAssets;
+    }
+
+    function newLostAssets() external view returns (uint256) {
+        uint256 realTotalAssets = realTotalAssets();
+
+        uint256 newLostAssets;
+        if (realTotalAssets < lastTotalAssets - lostAssets) newLostAssets = lastTotalAssets - realTotalAssets;
+        else newLostAssets = lostAssets;
+
+        return newLostAssets;
     }
 }
