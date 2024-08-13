@@ -3,33 +3,17 @@ pragma solidity ^0.8.0;
 
 import "./helpers/IntegrationTest.sol";
 
-contract ModifiedMorpho {
-    address public owner;
-    address public feeRecipient;
-    mapping(bytes32 => mapping(address => Position)) public position;
-    mapping(bytes32 => Market) public market;
-
-    function writeTotalSupplyAssets(bytes32 id, uint128 newValue) external {
-        market[id].totalSupplyAssets = newValue;
-    }
-}
-
 contract LostAssetsTest is IntegrationTest {
     using stdStorage for StdStorage;
     using MorphoBalancesLib for IMorpho;
     using MarketParamsLib for MarketParams;
 
-    bytes modifiedCode = _makeModifiedCode();
-    bytes normalCode = address(morpho).code;
-
-    function _makeModifiedCode() internal returns (bytes memory) {
-        return address(new ModifiedMorpho()).code;
-    }
-
     function _writeTotalSupplyAssets(bytes32 id, uint128 newValue) internal {
-        vm.etch(address(morpho), modifiedCode);
-        ModifiedMorpho(address(morpho)).writeTotalSupplyAssets(id, newValue);
-        vm.etch(address(morpho), normalCode);
+        uint256 marketSlot = 3;
+        bytes32 totalSupplySlot = keccak256(abi.encode(id, marketSlot));
+        bytes32 totalSupplyValue = vm.load(address(morpho), totalSupplySlot);
+        bytes32 newTotalSupplyValue = (totalSupplyValue >> 128 << 128) | bytes32(uint256(newValue));
+        vm.store(address(morpho), totalSupplySlot, newTotalSupplyValue);
     }
 
     function setUp() public override {
