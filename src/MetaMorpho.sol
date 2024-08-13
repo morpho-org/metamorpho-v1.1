@@ -885,7 +885,7 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
 
     /// @dev Computes and returns the `feeShares` to mint, the new `totalAssets` and the new `lostAssets`.
     /// @return feeShares the shares to mint to `feeRecipient`.
-    /// @return newTotalAssets the new totalSupply.
+    /// @return newTotalAssets the new `totalAssets`.
     /// @return newLostAssets the new lostAssets.
     function _accruedSupplyAndAssets() internal view returns (uint256, uint256, uint256) {
         // The assets that the vault has on Morpho.
@@ -901,7 +901,7 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
         else newLostAssets = lostAssets;
 
         uint256 newTotalAssets = realTotalAssets + newLostAssets;
-        uint256 totalInterest = newTotalAssets.zeroFloorSub(lastTotalAssets);
+        uint256 totalInterest = newTotalAssets - lastTotalAssets;
         uint256 feeShares;
         if (totalInterest != 0 && fee != 0) {
             // It is acknowledged that `feeAssets` may be rounded down to 0 if `totalInterest * fee < WAD`.
