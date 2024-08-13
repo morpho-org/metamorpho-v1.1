@@ -27,9 +27,9 @@ methods {
     // We assume that the borrow rate is view.
     function _.borrowRate(MorphoHarness.MarketParams, MorphoHarness.Market) external => NONDET;
 
-    // We deactivate callbacks. 
-    // Ideally we can assume that they can't change arbitrarily the storage of Morpho 
-    // and Metamorpho, but can only reenter through public entry-points, but I don't 
+    // We deactivate callbacks.
+    // Ideally we can assume that they can't change arbitrarily the storage of Morpho
+    // and Metamorpho, but can only reenter through public entry-points, but I don't
     // know how to do this.
     function _.onMorphoSupply(uint256, bytes) external => NONDET;
     function _.onMorphoRepay(uint256, bytes) external => NONDET;
@@ -48,7 +48,7 @@ methods {
 
 function summaryExpectedSupplyAssets(MorphoHarness.MarketParams marketParams, address user) returns uint256 {
     MorphoHarness.Id id = Util.libId(marketParams);
-    
+
     uint256 userShares = Morpho.supplyShares(id, user);
     uint256 totalSupplyAssets = Morpho.virtualTotalSupplyAssets(id);
     uint256 totalSupplyShares = Morpho.virtualTotalSupplyShares(id);
@@ -97,11 +97,10 @@ invariant realPlusLostEqualsTotal()
     realTotalAssets() + newLostAssets() == to_mathint(totalAssets());
 
 
-rule lostAssetsOnlyMovesAfterUpdateWQueueAndLiquidate(method f, env e, calldataarg args) 
+rule lostAssetsOnlyMovesAfterUpdateWQueueAndLiquidate(method f, env e, calldataarg args)
 filtered {
-    f -> f.selector != sig:liquidate(MorphoHarness.MarketParams, address, uint256, uint256, bytes).selector &&
+    f -> f.selector != sig:MorphoHarness.liquidate(MorphoHarness.MarketParams, address, uint256, uint256, bytes).selector &&
         f.selector != sig:updateWithdrawQueue(uint256[]).selector
-         
 }
 {
     uint256 lostAssetsBefore = lostAssets();
