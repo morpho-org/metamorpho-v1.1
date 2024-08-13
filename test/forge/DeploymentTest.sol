@@ -27,7 +27,7 @@ contract DeploymentTest is IntegrationTest {
     ) public {
         assumeNotZeroAddress(owner);
         assumeNotZeroAddress(morpho);
-        initialTimelock = bound(initialTimelock, 1 days, ConstantsLib.MAX_TIMELOCK);
+        initialTimelock = bound(initialTimelock, 0 days, ConstantsLib.MAX_TIMELOCK);
 
         IMetaMorpho newVault = createMetaMorpho(owner, morpho, initialTimelock, address(loanToken), name, symbol);
 
