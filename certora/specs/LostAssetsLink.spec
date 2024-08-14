@@ -14,7 +14,7 @@ methods {
     function newLostAssets() external returns(uint256) envfree;
     function MORPHO() external returns(address) envfree;
 
-    function MetaMorpho._accruedSupplyAndAssets() internal returns (uint256,uint256,uint256) => NONDET /* difficulty 106 */;
+    function MetaMorpho._accruedFeeAndAssets() internal returns (uint256,uint256,uint256) => NONDET /* difficulty 106 */;
     function MetaMorphoHarness.convertToShares(uint256) internal returns (uint256) => NONDET /* difficulty 127 */;
     function MetaMorphoHarness.maxWithdraw(address) internal returns (uint256) => NONDET /* difficulty 158 */;
     function MetaMorphoHarness.previewWithdraw(uint256) internal returns (uint256) => NONDET /* difficulty 127 */;
