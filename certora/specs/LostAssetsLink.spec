@@ -14,6 +14,22 @@ methods {
     function newLostAssets() external returns(uint256) envfree;
     function MORPHO() external returns(address) envfree;
 
+    function MetaMorpho._accruedSupplyAndAssets() internal returns (uint256,uint256,uint256) => NONDET /* difficulty 106 */;
+    function MetaMorphoHarness.convertToShares(uint256) internal returns (uint256) => NONDET /* difficulty 127 */;
+    function MetaMorphoHarness.maxWithdraw(address) internal returns (uint256) => NONDET /* difficulty 158 */;
+    function MetaMorphoHarness.previewWithdraw(uint256) internal returns (uint256) => NONDET /* difficulty 127 */;
+    // function MetaMorphoHarness.totalAssets() internal returns (uint256) => NONDET /* difficulty 106 */;
+    function MetaMorphoHarness.previewMint(uint256) internal returns (uint256) => NONDET /* difficulty 127 */;
+    function MetaMorphoHarness.previewRedeem(uint256) internal returns (uint256) => NONDET /* difficulty 127 */;
+    function MetaMorphoHarness.convertToAssets(uint256) internal returns (uint256) => NONDET /* difficulty 127 */;
+    function MetaMorpho._convertToShares(uint256,Math.Rounding) internal returns (uint256) => NONDET /* difficulty 127 */;
+    function MetaMorpho._maxWithdraw(address) internal returns (uint256,uint256,uint256) => NONDET /* difficulty 158 */;
+    function MetaMorphoHarness.maxMint(address) internal returns (uint256) => NONDET /* difficulty 146 */;
+    function MetaMorpho._convertToAssets(uint256,Math.Rounding) internal returns (uint256) => NONDET /* difficulty 127 */;
+    function MetaMorphoHarness.previewDeposit(uint256) internal returns (uint256) => NONDET /* difficulty 127 */;
+    function MetaMorphoHarness.maxRedeem(address) internal returns (uint256) => NONDET /* difficulty 179 */;
+    // function Math.mulDiv(uint256,uint256,uint256) internal returns (uint256) => NONDET /* difficulty 68 */;
+
     // Summaries.
     function _.expectedSupplyAssets(MorphoHarness.MarketParams marketParams, address user) external => summaryExpectedSupplyAssets(marketParams, user) expect (uint256);
     function _.idToMarketParams(MetaMorphoHarness.Id id) external => summaryIdToMarketParams(id) expect MetaMorphoHarness.MarketParams ALL;
