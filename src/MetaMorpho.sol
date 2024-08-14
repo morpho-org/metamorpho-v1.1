@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
-pragma solidity 0.8.21;
+pragma solidity 0.8.26;
 
 import {
     MarketConfig,
@@ -110,12 +110,6 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
     /// @inheritdoc IMetaMorphoBase
     uint256 public lostAssets;
 
-    /// @dev "Overrides" the ERC20's storage variable to be able to modify it.
-    string private _name;
-
-    /// @dev "Overrides" the ERC20's storage variable to be able to modify it.
-    string private _symbol;
-
     /* CONSTRUCTOR */
 
     /// @dev Initializes the contract.
@@ -123,24 +117,20 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
     /// @param morpho The address of the Morpho contract.
     /// @param initialTimelock The initial timelock.
     /// @param _asset The address of the underlying asset.
-    /// @param __name The name of the vault.
-    /// @param __symbol The symbol of the vault.
-    /// @dev We pass "" as name and symbol to the ERC20 because these are overriden in this contract.
+    /// @param _name The name of the vault.
+    /// @param _symbol The symbol of the vault.
     constructor(
         address owner,
         address morpho,
         uint256 initialTimelock,
         address _asset,
-        string memory __name,
-        string memory __symbol
-    ) ERC4626(IERC20(_asset)) ERC20Permit("") ERC20("", "") Ownable(owner) {
+        string memory _name,
+        string memory _symbol
+    ) ERC4626(IERC20(_asset)) ERC20Permit(_name) ERC20(_name, _symbol) Ownable(owner) {
         if (morpho == address(0)) revert ErrorsLib.ZeroAddress();
 
-        _name = __name;
-        emit EventsLib.SetName(__name);
-
-        _symbol = __symbol;
-        emit EventsLib.SetSymbol(__symbol);
+        emit EventsLib.SetName(_name);
+        emit EventsLib.SetSymbol(_symbol);
 
         MORPHO = IMorpho(morpho);
         DECIMALS_OFFSET = uint8(uint256(18).zeroFloorSub(IERC20Metadata(_asset).decimals()));
@@ -200,14 +190,16 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
 
     /* ONLY OWNER FUNCTIONS */
 
+    /// @inheritdoc IMetaMorphoBase
     function setName(string memory newName) external onlyOwner {
-        _name = newName;
+        name = newName;
 
         emit EventsLib.SetName(newName);
     }
 
+    /// @inheritdoc IMetaMorphoBase
     function setSymbol(string memory newSymbol) external onlyOwner {
-        _symbol = newSymbol;
+        symbol = newSymbol;
 
         emit EventsLib.SetSymbol(newSymbol);
     }
@@ -523,14 +515,6 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
     /// @inheritdoc IERC20Metadata
     function decimals() public view override(ERC20, ERC4626) returns (uint8) {
         return ERC4626.decimals();
-    }
-
-    function name() public view override(IERC20Metadata, ERC20) returns (string memory) {
-        return _name;
-    }
-
-    function symbol() public view override(IERC20Metadata, ERC20) returns (string memory) {
-        return _symbol;
     }
 
     /// @inheritdoc IERC4626
