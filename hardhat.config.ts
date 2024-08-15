@@ -61,6 +61,8 @@ const config: HardhatUserConfig = {
           order: "fifo",
         },
       },
+      // Required because hardhat has a bug regarding contract sizes.
+      allowUnlimitedContractSize: true,
     },
   },
   solidity: {
@@ -69,11 +71,11 @@ const config: HardhatUserConfig = {
         version: "0.8.26",
         settings: {
           optimizer: {
-            enabled: true,
-            runs: 200,
+            enabled: false,
+            runs: 0,
           },
           viaIR: true,
-          evmVersion: "paris",
+          evmVersion: "cancun",
         },
       },
       {
