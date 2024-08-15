@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
-pragma solidity 0.8.21;
+pragma solidity 0.8.26;
 
 import {
     Math, MetaMorpho, Id, ConstantsLib, PendingUint192, PendingAddress, MarketConfig
