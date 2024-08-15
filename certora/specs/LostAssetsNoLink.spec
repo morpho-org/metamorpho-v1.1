@@ -1,11 +1,8 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 methods {
-    // TODO: why do we need to do this?
     function multicall(bytes[]) external returns(bytes[]) => NONDET DELETE;
 
-    // We assume that the following functions are envfree, meaning don't depend on 
-    // tx, sender and block.
     function lostAssets() external returns(uint256) envfree;
     function totalAssets() external returns(uint256) envfree;
     function totalSupply() external returns(uint256) envfree;
@@ -13,9 +10,7 @@ methods {
     function realTotalAssets() external returns(uint256) envfree;
     function fee() external returns(uint96) envfree;
     function maxFee() external returns(uint256) envfree;
-
-    // Assume that it's a constant.
-    function DECIMALS_OFFSET() external returns(uint8) envfree => CONSTANT;
+    function DECIMALS_OFFSET() external returns(uint8) envfree;
 
     // We assume that Morpho and the ERC20s can't touch back Metamorpho.
     // TODO: improve this, and assume that there can be reentrancies through public entry-points.
@@ -30,6 +25,19 @@ methods {
     function _.transfer(address, uint256) external => NONDET;
     function _.transferFrom(address, address, uint256) external => NONDET;
     function _.balanceOf(address) external => NONDET;
+
+    // Summarise mulDiv because its implementation is too complex.
+    function _.mulDiv(uint256 x, uint256 y, uint256 denominator, Math.Rounding rounding) internal => summaryMulDiv(x, y, denominator, rounding) expect (uint256);
+}
+
+function summaryMulDiv(uint256 x, uint256 y, uint256 d, Math.Rounding rounding) returns uint256 {
+    if (rounding == Math.Rounding.Floor) {
+        // Safe require because the reference implementation would revert.
+        return require_uint256((x * y) / d);
+    } else {
+        // Safe require because the reference implementation would revert.
+        return require_uint256((x * y + (d - 1)) / d);
+    }
 }
 
 rule lostAssetsIncreases(method f, env e, calldataarg args) {
