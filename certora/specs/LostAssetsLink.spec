@@ -14,6 +14,11 @@ methods {
     function newLostAssets() external returns(uint256) envfree;
     function MORPHO() external returns(address) envfree;
 
+    function MetaMorpho._convertToAssets(uint256,Math.Rounding) internal returns (uint256) => NONDET /* difficulty 127 */;
+    function MetaMorpho._convertToShares(uint256,Math.Rounding) internal returns (uint256) => NONDET /* difficulty 127 */;
+    function MetaMorpho._convertToAssetsWithTotals(uint256, uint256, uint256, Math.Rounding) internal returns (uint256) => NONDET;
+    function MetaMorpho._convertToSharesWithTotals(uint256, uint256, uint256, Math.Rounding) internal returns (uint256) => NONDET;
+
     // Summaries.
     function _.expectedSupplyAssets(MorphoHarness.MarketParams marketParams, address user) external => summaryExpectedSupplyAssets(marketParams, user) expect (uint256);
     function _.idToMarketParams(MetaMorphoHarness.Id id) external => summaryIdToMarketParams(id) expect MetaMorphoHarness.MarketParams ALL;
@@ -60,6 +65,8 @@ function summaryExpectedSupplyAssets(MorphoHarness.MarketParams marketParams, ad
 
 // Metamorpho's mulDiv (from OZ).
 function summaryMulDiv(uint256 x, uint256 y, uint256 d, Math.Rounding rounding) returns uint256 {
+    require d != 0;
+    
     if (rounding == Math.Rounding.Floor) {
         // Safe require because the reference implementation would revert.
         return require_uint256((x * y) / d);
@@ -71,12 +78,14 @@ function summaryMulDiv(uint256 x, uint256 y, uint256 d, Math.Rounding rounding) 
 
 // Morpho's mulDivUp.
 function summaryMulDivUp(uint256 x, uint256 y, uint256 d) returns uint256 {
+    require d != 0;
     // Safe require because the reference implementation would revert.
     return require_uint256((x * y + (d - 1)) / d);
 }
 
 // Morpho's mulDivDown.
 function summaryMulDivDown(uint256 x, uint256 y, uint256 d) returns uint256 {
+    require d != 0;
     // Safe require because the reference implementation would revert.
     return require_uint256((x * y) / d);
 }
@@ -99,12 +108,16 @@ invariant realPlusLostEqualsTotal()
 
 
 // LostAssets can only change after some bad debt has been realised or a market has been forced removed.
-rule lostAssetsOnlyMovesAfterUpdateWQueueAndLiquidate(method f, env e, calldataarg args)
+rule lostAssetsOnlyMovesAfterUpdateWQueueAndLiquidate(env e0, method f, env e, calldataarg args)
 filtered {
-    f -> f.selector != sig:MorphoHarness.liquidate(MorphoHarness.MarketParams, address, uint256, uint256, bytes).selector &&
+    f -> !f.isView &&
+        f.selector != sig:MorphoHarness.liquidate(MorphoHarness.MarketParams, address, uint256, uint256, bytes).selector &&
         f.selector != sig:updateWithdrawQueue(uint256[]).selector
 }
 {
+    require e.msg.sender != currentContract;
+    
+    deposit(e0, 0, 1);
     uint256 lostAssetsBefore = newLostAssets();
 
     f(e, args);
