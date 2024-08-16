@@ -114,10 +114,10 @@ function summaryIdToMarketParams(MetaMorphoHarness.Id id) returns MetaMorphoHarn
 
 // Deactivated because they are timing out
 
-// // Note that it implies newLostAssets <= totalAssets.
-// // Note that it implies realTotalAssets + lostAssets = lastTotalAssets after accrueInterest().
-// invariant realPlusLostEqualsTotal()
-//     realTotalAssets() + newLostAssets() == to_mathint(totalAssets());
+// Note that it implies newLostAssets <= totalAssets.
+// Note that it implies realTotalAssets + lostAssets = lastTotalAssets after accrueInterest().
+invariant realPlusLostEqualsTotal()
+    realTotalAssets() + newLostAssets() == to_mathint(totalAssets());
 
 
 // // LostAssets can only change after some bad debt has been realised or a market has been forced removed.
