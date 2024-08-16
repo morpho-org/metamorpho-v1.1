@@ -26,7 +26,7 @@ contract GuardianTest is IntegrationTest {
     }
 
     function testGuardianRevokePendingTimelockDecreased(uint256 timelock, uint256 elapsed) public {
-        timelock = bound(timelock, 0, TIMELOCK - 1);
+        timelock = bound(timelock, ConstantsLib.MIN_TIMELOCK, TIMELOCK - 1);
         elapsed = bound(elapsed, 0, TIMELOCK - 1);
 
         vm.prank(OWNER);
@@ -48,7 +48,7 @@ contract GuardianTest is IntegrationTest {
     }
 
     function testOwnerRevokePendingTimelockDecreased(uint256 timelock, uint256 elapsed) public {
-        timelock = bound(timelock, 0, TIMELOCK - 1);
+        timelock = bound(timelock, ConstantsLib.MIN_TIMELOCK, TIMELOCK - 1);
         elapsed = bound(elapsed, 0, TIMELOCK - 1);
 
         vm.prank(OWNER);
