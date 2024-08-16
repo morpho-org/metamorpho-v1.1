@@ -9,6 +9,11 @@ methods {
     function _.transfer(address, uint256) external => boolSummary() expect bool;
     function _.transferFrom(address, address, uint256) external => boolSummary() expect bool;
     function _.balanceOf(address) external => uintSummary() expect uint256;
+
+    function _._ external => DISPATCH [
+        _.transfer(address, uint256),
+        _.transferFrom(address, address,uint256)
+    ] default NONDET;
 }
 
 function voidSummary() {
