@@ -8,6 +8,8 @@ contract LostAssetsTest is IntegrationTest {
     using MorphoBalancesLib for IMorpho;
     using MarketParamsLib for MarketParams;
 
+    address internal LIQUIDATOR;
+
     function _writeTotalSupplyAssets(bytes32 id, uint128 newValue) internal {
         uint256 marketSlot = 3;
         bytes32 totalSupplySlot = keccak256(abi.encode(id, marketSlot));
@@ -21,6 +23,8 @@ contract LostAssetsTest is IntegrationTest {
 
         _setCap(allMarkets[0], CAP);
         _sortSupplyQueueIdleLast();
+
+        LIQUIDATOR = makeAddr("Liquidator");
     }
 
     function testWriteTotalSupplyAssets(bytes32 id, uint128 newValue) public {
@@ -249,5 +253,38 @@ contract LostAssetsTest is IntegrationTest {
 
         assertEq(totalAssetsBefore, totalAssetsAfter);
         assertEq(vault.lostAssets(), assets0);
+    }
+
+    function testLostAssetsAfterBadDebt() public {
+        uint256 collateral = 1 ether;
+        uint256 borrowed = 0.8 ether;
+        uint256 deposit = 2 ether;
+
+        collateralToken.setBalance(BORROWER, collateral);
+        loanToken.setBalance(LIQUIDATOR, borrowed);
+        loanToken.setBalance(SUPPLIER, deposit);
+
+        vm.prank(SUPPLIER);
+        vault.deposit(deposit, ONBEHALF);
+
+        vm.startPrank(BORROWER);
+        morpho.supplyCollateral(allMarkets[0], collateral, BORROWER, hex"");
+        morpho.borrow(allMarkets[0], borrowed, 0, BORROWER, BORROWER);
+        vm.stopPrank();
+
+        oracle.setPrice(0);
+
+        vm.prank(LIQUIDATOR);
+
+        morpho.liquidate(allMarkets[0], BORROWER, collateral, 0, hex"");
+
+        uint256 totalAssetsBefore = vault.totalAssets();
+
+        assertEq(vault.lostAssets(), 0);
+
+        vault.deposit(0, ONBEHALF); // update lostAssets.
+
+        assertEq(vault.lostAssets(), 0.8 ether);
+        assertEq(totalAssetsBefore, vault.totalAssets());
     }
 }
