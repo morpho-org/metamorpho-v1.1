@@ -676,7 +676,7 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
         override
     {
         // `lastTotalAssets - assets` may be a little off from `totalAssets()`.
-        _updateLastTotalAssets(lastTotalAssets - assets);
+        _updateLastTotalAssets(lastTotalAssets.zeroFloorSub(assets));
 
         _withdrawMorpho(assets);
 
