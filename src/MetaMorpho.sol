@@ -676,6 +676,7 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
         override
     {
         // `lastTotalAssets - assets` may be a little off from `totalAssets()`.
+        // clamp at 0 so the error raised is the more informative NotEnoughLiquidity.
         _updateLastTotalAssets(lastTotalAssets.zeroFloorSub(assets));
 
         _withdrawMorpho(assets);
