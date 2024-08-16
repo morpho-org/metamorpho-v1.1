@@ -7,6 +7,7 @@ contract LostAssetsTest is IntegrationTest {
     using stdStorage for StdStorage;
     using MorphoBalancesLib for IMorpho;
     using MarketParamsLib for MarketParams;
+    using MathLib for uint256;
 
     address internal LIQUIDATOR;
 
@@ -257,7 +258,7 @@ contract LostAssetsTest is IntegrationTest {
 
     function testLostAssetsAfterBadDebt(uint256 borrowed, uint256 collateral, uint256 deposit) public {
         borrowed = bound(borrowed, MIN_TEST_ASSETS, MAX_TEST_ASSETS);
-        collateral = bound(collateral, borrowed * 1e18 / allMarkets[0].lltv + 1, type(uint128).max);
+        collateral = bound(collateral, borrowed.mulDivUp(1e18, allMarkets[0].lltv), type(uint128).max);
         deposit = bound(deposit, borrowed, MAX_TEST_ASSETS);
 
         collateralToken.setBalance(BORROWER, collateral);
