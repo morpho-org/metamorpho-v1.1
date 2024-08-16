@@ -120,10 +120,10 @@ interface IMetaMorphoBase {
     /// @dev Does not revert if there is no pending market removal.
     function revokePendingMarketRemoval(Id id) external;
 
-    /// @notice Changes the name of the vault.
+    /// @notice Sets the name of the vault.
     function setName(string memory newName) external;
 
-    /// @notice Changes the symbol of the vault.
+    /// @notice Sets the symbol of the vault.
     function setSymbol(string memory newSymbol) external;
 
     /// @notice Submits a `newGuardian`.
