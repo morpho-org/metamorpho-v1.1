@@ -75,7 +75,7 @@ const config: HardhatUserConfig = {
             runs: 0,
           },
           viaIR: true,
-          evmVersion: "cancun",
+          evmVersion: "paris",
         },
       },
       {
