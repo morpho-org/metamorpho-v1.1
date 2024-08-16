@@ -41,8 +41,8 @@ contract IntegrationTest is BaseTest {
     }
 
     // Deploy MetaMorpho from artifacts
-    // Replaces using `new MetaMorpho` which would force 0.8.26 on all tests
-    // (since MetaMorpho has pragma solidity 0.8.26)
+    // Replaces using `new MetaMorpho` which would force 0.8.24 on all tests
+    // (since MetaMorpho has pragma solidity 0.8.24)
     function createMetaMorpho(
         address owner,
         address morpho,
