@@ -675,10 +675,32 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
         internal
         override
     {
-        // `lastTotalAssets - assets` may be a little off from `totalAssets()`.
-        _updateLastTotalAssets(lastTotalAssets.zeroFloorSub(assets));
+        uint256 assetsLeft = assets;
 
-        _withdrawMorpho(assets);
+        for (uint256 i; i < withdrawQueue.length; ++i) {
+            Id id = withdrawQueue[i];
+            MarketParams memory marketParams = _marketParams(id);
+            (uint256 supplyAssets,, Market memory market) = _accruedSupplyBalance(marketParams, id);
+
+            uint256 toWithdraw = UtilsLib.min(
+                _withdrawable(marketParams, market.totalSupplyAssets, market.totalBorrowAssets, supplyAssets),
+                assetsLeft
+            );
+
+            if (toWithdraw > 0) {
+                // Using try/catch to skip markets that revert.
+                try MORPHO.withdraw(marketParams, toWithdraw, 0, address(this), address(this)) {
+                    assetsLeft -= toWithdraw;
+                } catch {}
+            }
+
+            if (assetsLeft == 0) break;
+        }
+
+        if (assetsLeft != 0) revert ErrorsLib.NotEnoughLiquidity();
+
+        // `lastTotalAssets - assets` may be a little off from `totalAssets()`.
+        _updateLastTotalAssets(lastTotalAssets - assets);
 
         super._withdraw(caller, receiver, owner, assets, shares);
     }
@@ -789,30 +811,6 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
         }
 
         if (assets != 0) revert ErrorsLib.AllCapsReached();
-    }
-
-    /// @dev Withdraws `assets` from Morpho.
-    function _withdrawMorpho(uint256 assets) internal {
-        for (uint256 i; i < withdrawQueue.length; ++i) {
-            Id id = withdrawQueue[i];
-            MarketParams memory marketParams = _marketParams(id);
-            (uint256 supplyAssets,, Market memory market) = _accruedSupplyBalance(marketParams, id);
-
-            uint256 toWithdraw = UtilsLib.min(
-                _withdrawable(marketParams, market.totalSupplyAssets, market.totalBorrowAssets, supplyAssets), assets
-            );
-
-            if (toWithdraw > 0) {
-                // Using try/catch to skip markets that revert.
-                try MORPHO.withdraw(marketParams, toWithdraw, 0, address(this), address(this)) {
-                    assets -= toWithdraw;
-                } catch {}
-            }
-
-            if (assets == 0) return;
-        }
-
-        if (assets != 0) revert ErrorsLib.NotEnoughLiquidity();
     }
 
     /// @dev Simulates a withdraw of `assets` from Morpho.
