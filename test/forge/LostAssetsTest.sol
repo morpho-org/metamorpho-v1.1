@@ -250,4 +250,53 @@ contract LostAssetsTest is IntegrationTest {
         assertEq(totalAssetsBefore, totalAssetsAfter);
         assertEq(vault.lostAssets(), assets0);
     }
+
+    function testDontCreateLostAssets() public {
+        _setCap(allMarkets[0], type(uint128).max);
+        Id[] memory supplyQueue = new Id[](1);
+        supplyQueue[0] = allMarkets[0].id();
+        vm.prank(CURATOR);
+        vault.setSupplyQueue(supplyQueue);
+
+        uint256 assets0 = 1 ether;
+
+        loanToken.setBalance(address(this), 1 ether);
+        loanToken.setBalance(SUPPLIER, assets0);
+        collateralToken.setBalance(BORROWER, type(uint128).max);
+
+        vm.prank(SUPPLIER);
+        morpho.supply(allMarkets[0], assets0, 0, SUPPLIER, hex"");
+
+        vm.startPrank(BORROWER);
+        morpho.supplyCollateral(allMarkets[0], type(uint128).max, BORROWER, hex"");
+        morpho.borrow(allMarkets[0], assets0, 0, BORROWER, BORROWER);
+        vm.stopPrank();
+
+        // WARP
+        irm.setApr(1e18);
+        vm.warp(block.timestamp + 1000);
+        morpho.accrueInterest(allMarkets[0]);
+
+        console.log("Depositing 2 assets in vault.");
+        console.log("");
+        vault.deposit(2, address(this));
+
+        console.log("morpho.assets(vault)   : %s", morpho.expectedSupplyAssets(allMarkets[0], address(vault)));
+        console.log("vault.balanceOf(this)  : %s", vault.balanceOf(address(this)));
+        console.log("vault.lastTotalAssets(): %s", vault.lastTotalAssets());
+        console.log("vault.lostAssets()     : %s", vault.lostAssets());
+
+        console.log("");
+        console.log("Updating vault.");
+        console.log("");
+
+        vault.deposit(0, address(this));
+
+        console.log("morpho.assets(vault)   : %s", morpho.expectedSupplyAssets(allMarkets[0], address(vault)));
+        console.log("vault.balanceOf(this)  : %s", vault.balanceOf(address(this)));
+        console.log("vault.lastTotalAssets(): %s", vault.lastTotalAssets());
+        console.log("vault.lostAssets()     : %s", vault.lostAssets());
+
+        assertEq(vault.lostAssets(), 0);
+    }
 }
