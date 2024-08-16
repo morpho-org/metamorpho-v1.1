@@ -247,7 +247,7 @@ contract LostAssetsTest is IntegrationTest {
 
         vault.deposit(0, ONBEHALF); // update lostAssets.
 
-        assertEq(totalAssetsBefore, totalAssetsAfter);
-        assertEq(vault.lostAssets(), assets0);
+        assertEq(totalAssetsBefore, totalAssetsAfter + assets0);
+        assertEq(vault.lostAssets(), 0);
     }
 }

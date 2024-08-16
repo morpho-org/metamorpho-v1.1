@@ -365,6 +365,14 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
         withdrawQueue = newWithdrawQueue;
 
         emit EventsLib.SetWithdrawQueue(_msgSender(), newWithdrawQueue);
+
+        (uint256 feeShares, uint256 newTotalAssets, uint256 newLostAssets) = _accruedFeeAndAssets();
+
+        newTotalAssets = newTotalAssets - newLostAssets + lostAssets;
+        _updateLastTotalAssets(newTotalAssets);
+
+        if (feeShares != 0) _mint(feeRecipient, feeShares);
+        emit EventsLib.AccrueInterest(newTotalAssets, feeShares);
     }
 
     /// @inheritdoc IMetaMorphoBase
