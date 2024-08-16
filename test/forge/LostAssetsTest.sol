@@ -255,10 +255,10 @@ contract LostAssetsTest is IntegrationTest {
         assertEq(vault.lostAssets(), assets0);
     }
 
-    function testLostAssetsAfterBadDebt() public {
-        uint256 collateral = 1 ether;
-        uint256 borrowed = 0.8 ether;
-        uint256 deposit = 2 ether;
+    function testLostAssetsAfterBadDebt(uint256 borrowed, uint256 deposit) public {
+        borrowed = bound(borrowed, MIN_TEST_ASSETS, MAX_TEST_ASSETS);
+        collateral = bound(collateral, borrowed * 1e18 / LLTV, type(uint256).max);
+        deposit = bound(deposit, borrowed, MAX_TEST_ASSETS);
 
         collateralToken.setBalance(BORROWER, collateral);
         loanToken.setBalance(LIQUIDATOR, borrowed);
