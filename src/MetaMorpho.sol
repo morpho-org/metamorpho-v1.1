@@ -661,7 +661,8 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
 
         _supplyMorpho(assets);
 
-        // `lastTotalAssets + assets` may be a little off from `totalAssets()`.
+        // `lastTotalAssets + assets` may be a little above `totalAssets()`.
+        // This can lead to a small accrual of `lostAssets` at the next interaction.
         _updateLastTotalAssets(lastTotalAssets + assets);
     }
 
@@ -675,7 +676,8 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
         internal
         override
     {
-        // `lastTotalAssets - assets` may be a little off from `totalAssets()`.
+        // `lastTotalAssets - assets` may be a little above `totalAssets()`.
+        // This can lead to a small accrual of `lostAssets` at the next interaction.
         // clamp at 0 so the error raised is the more informative NotEnoughLiquidity.
         _updateLastTotalAssets(lastTotalAssets.zeroFloorSub(assets));
 
