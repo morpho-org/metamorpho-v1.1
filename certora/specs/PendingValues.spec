@@ -4,7 +4,7 @@ import "Range.spec";
 function hasNoBadPendingTimelock() returns bool {
     MetaMorphoHarness.PendingUint192 pendingTimelock = pendingTimelock_();
 
-    return pendingTimelock.validAt == 0 => pendingTimelock.value == 0;
+    return pendingTimelock.validAt == 0 <=> pendingTimelock.value == 0;
 }
 
 // Check that having no pending timelock value is equivalent to having its valid timestamp at 0.
@@ -22,7 +22,7 @@ invariant noBadPendingTimelock()
 
 // Check that the pending timelock value is always strictly smaller than the current timelock value.
 invariant smallerPendingTimelock()
-    assert_uint256(pendingTimelock_().value) < timelock() || timelock() == 0
+    assert_uint256(pendingTimelock_().value) < timelock()
 {
     preserved with (env e) {
         requireInvariant pendingTimelockInRange();

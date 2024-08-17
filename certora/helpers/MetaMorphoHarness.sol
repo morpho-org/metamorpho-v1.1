@@ -31,6 +31,10 @@ contract MetaMorphoHarness is MetaMorpho {
         return pendingCap[id];
     }
 
+    function minTimelock() external pure returns (uint256) {
+        return ConstantsLib.MIN_TIMELOCK;
+    }
+
     function maxTimelock() external pure returns (uint256) {
         return ConstantsLib.MAX_TIMELOCK;
     }

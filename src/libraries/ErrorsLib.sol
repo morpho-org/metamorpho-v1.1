@@ -78,6 +78,9 @@ library ErrorsLib {
     /// @notice Thrown when the submitted timelock is above the max timelock.
     error AboveMaxTimelock();
 
+    /// @notice Thrown when the submitted timelock is below the min timelock.
+    error BelowMinTimelock();
+
     /// @notice Thrown when the timelock is not elapsed.
     error TimelockNotElapsed();
 
