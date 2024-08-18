@@ -37,7 +37,7 @@ function isPendingTimelockInRange() returns bool {
         assert_uint256(pendingTimelock.value) >= minTimelock();
 }
 
-// Check that the pending timelock is bounded by the max timelock.
+// Check that the pending timelock is bounded by the min timelock and the max timelock.
 invariant pendingTimelockInRange()
     isPendingTimelockInRange();
 

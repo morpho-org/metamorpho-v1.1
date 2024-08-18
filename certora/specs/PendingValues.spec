@@ -35,7 +35,7 @@ invariant smallerPendingTimelock()
 function hasNoBadPendingCap(MetaMorphoHarness.Id id) returns bool {
     MetaMorphoHarness.PendingUint192 pendingCap = pendingCap_(id);
 
-    return pendingCap.validAt == 0 => pendingCap.value == 0;
+    return pendingCap.validAt == 0 <=> pendingCap.value == 0;
 }
 
 // Check that having no pending cap value is equivalent to having its valid timestamp at 0.

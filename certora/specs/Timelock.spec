@@ -188,7 +188,7 @@ rule removableTime(env e_next, method f, calldataarg args) {
     assert true;
 }
 
-rule timelockZero(env e, method f, calldataarg args) {
+rule timelockCantGoToZero(env e, method f, calldataarg args) {
     requireInvariant pendingTimelockInRange();
     
     uint256 timelockBefore = timelock();
