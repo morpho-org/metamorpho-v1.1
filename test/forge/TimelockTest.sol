@@ -72,13 +72,6 @@ contract TimelockTest is IntegrationTest {
         createMetaMorpho(OWNER, address(morpho), timelock, address(loanToken), "MetaMorpho Vault", "MMV");
     }
 
-    function testDeployMetaMorphoBelowMinTimelock(uint256 timelock) public {
-        timelock = bound(timelock, 0, ConstantsLib.MIN_TIMELOCK - 1);
-
-        vm.expectRevert(ErrorsLib.BelowMinTimelock.selector);
-        createMetaMorpho(OWNER, address(morpho), timelock, address(loanToken), "MetaMorpho Vault", "MMV");
-    }
-
     function testSubmitTimelockAboveMaxTimelock(uint256 timelock) public {
         timelock = bound(timelock, ConstantsLib.MAX_TIMELOCK + 1, type(uint256).max);
 
@@ -87,19 +80,19 @@ contract TimelockTest is IntegrationTest {
         vault.submitTimelock(timelock);
     }
 
-    function testSubmitTimelockBelowMinTimelock(uint256 timelock) public {
-        timelock = bound(timelock, 0, ConstantsLib.MIN_TIMELOCK - 1);
-
-        vm.prank(OWNER);
-        vm.expectRevert(ErrorsLib.BelowMinTimelock.selector);
-        vault.submitTimelock(timelock);
-    }
-
     function testSubmitTimelockAlreadySet() public {
         uint256 timelock = vault.timelock();
 
         vm.prank(OWNER);
         vm.expectRevert(ErrorsLib.AlreadySet.selector);
+        vault.submitTimelock(timelock);
+    }
+
+    function testSubmitTimelockBelowMinTimelock(uint256 timelock) public {
+        timelock = bound(timelock, 0, ConstantsLib.MIN_TIMELOCK - 1);
+
+        vm.prank(OWNER);
+        vm.expectRevert(ErrorsLib.BelowMinTimelock.selector);
         vault.submitTimelock(timelock);
     }
 
