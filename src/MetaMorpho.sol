@@ -107,6 +107,9 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
     /// @inheritdoc IMetaMorphoBase
     uint256 public lastTotalAssets;
 
+    /// @inheritdoc IMetaMorphoBase
+    uint256 public lostAssets;
+
     /* CONSTRUCTOR */
 
     /// @dev Initializes the contract.
@@ -233,8 +236,8 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
         if (newFee > ConstantsLib.MAX_FEE) revert ErrorsLib.MaxFeeExceeded();
         if (newFee != 0 && feeRecipient == address(0)) revert ErrorsLib.ZeroFeeRecipient();
 
-        // Accrue fee using the previous fee set before changing it.
-        _updateLastTotalAssets(_accrueFee());
+        // Accrue interest and fee using the previous fee set before changing it.
+        _accrueInterest();
 
         // Safe "unchecked" cast because newFee <= MAX_FEE.
         fee = uint96(newFee);
@@ -247,8 +250,8 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
         if (newFeeRecipient == feeRecipient) revert ErrorsLib.AlreadySet();
         if (newFeeRecipient == address(0) && fee != 0) revert ErrorsLib.ZeroFeeRecipient();
 
-        // Accrue fee to the previous fee recipient set before changing it.
-        _updateLastTotalAssets(_accrueFee());
+        // Accrue interest and fee to the previous fee recipient set before changing it.
+        _accrueInterest();
 
         feeRecipient = newFeeRecipient;
 
@@ -529,63 +532,49 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
 
     /// @inheritdoc IERC4626
     function deposit(uint256 assets, address receiver) public override returns (uint256 shares) {
-        uint256 newTotalAssets = _accrueFee();
+        _accrueInterest();
 
-        // Update `lastTotalAssets` to avoid an inconsistent state in a re-entrant context.
-        // It is updated again in `_deposit`.
-        lastTotalAssets = newTotalAssets;
-
-        shares = _convertToSharesWithTotals(assets, totalSupply(), newTotalAssets, Math.Rounding.Floor);
+        shares = _convertToSharesWithTotals(assets, totalSupply(), lastTotalAssets, Math.Rounding.Floor);
 
         _deposit(_msgSender(), receiver, assets, shares);
     }
 
     /// @inheritdoc IERC4626
     function mint(uint256 shares, address receiver) public override returns (uint256 assets) {
-        uint256 newTotalAssets = _accrueFee();
+        _accrueInterest();
 
-        // Update `lastTotalAssets` to avoid an inconsistent state in a re-entrant context.
-        // It is updated again in `_deposit`.
-        lastTotalAssets = newTotalAssets;
-
-        assets = _convertToAssetsWithTotals(shares, totalSupply(), newTotalAssets, Math.Rounding.Ceil);
+        assets = _convertToAssetsWithTotals(shares, totalSupply(), lastTotalAssets, Math.Rounding.Ceil);
 
         _deposit(_msgSender(), receiver, assets, shares);
     }
 
     /// @inheritdoc IERC4626
     function withdraw(uint256 assets, address receiver, address owner) public override returns (uint256 shares) {
-        uint256 newTotalAssets = _accrueFee();
+        _accrueInterest();
 
         // Do not call expensive `maxWithdraw` and optimistically withdraw assets.
 
-        shares = _convertToSharesWithTotals(assets, totalSupply(), newTotalAssets, Math.Rounding.Ceil);
-
-        // `newTotalAssets - assets` may be a little off from `totalAssets()`.
-        _updateLastTotalAssets(newTotalAssets.zeroFloorSub(assets));
+        shares = _convertToSharesWithTotals(assets, totalSupply(), lastTotalAssets, Math.Rounding.Ceil);
 
         _withdraw(_msgSender(), receiver, owner, assets, shares);
     }
 
     /// @inheritdoc IERC4626
     function redeem(uint256 shares, address receiver, address owner) public override returns (uint256 assets) {
-        uint256 newTotalAssets = _accrueFee();
+        _accrueInterest();
 
         // Do not call expensive `maxRedeem` and optimistically redeem shares.
 
-        assets = _convertToAssetsWithTotals(shares, totalSupply(), newTotalAssets, Math.Rounding.Floor);
-
-        // `newTotalAssets - assets` may be a little off from `totalAssets()`.
-        _updateLastTotalAssets(newTotalAssets.zeroFloorSub(assets));
+        assets = _convertToAssetsWithTotals(shares, totalSupply(), lastTotalAssets, Math.Rounding.Floor);
 
         _withdraw(_msgSender(), receiver, owner, assets, shares);
     }
 
     /// @inheritdoc IERC4626
-    function totalAssets() public view override returns (uint256 assets) {
-        for (uint256 i; i < withdrawQueue.length; ++i) {
-            assets += MORPHO.expectedSupplyAssets(_marketParams(withdrawQueue[i]), address(this));
-        }
+    function totalAssets() public view override returns (uint256) {
+        (, uint256 newTotalAssets,) = _accruedFeeAndAssets();
+
+        return newTotalAssets;
     }
 
     /* ERC4626 (INTERNAL) */
@@ -603,7 +592,7 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
         returns (uint256 assets, uint256 newTotalSupply, uint256 newTotalAssets)
     {
         uint256 feeShares;
-        (feeShares, newTotalAssets) = _accruedFeeShares();
+        (feeShares, newTotalAssets,) = _accruedFeeAndAssets();
         newTotalSupply = totalSupply() + feeShares;
 
         assets = _convertToAssetsWithTotals(balanceOf(owner), newTotalSupply, newTotalAssets, Math.Rounding.Floor);
@@ -630,7 +619,7 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
     /// @inheritdoc ERC4626
     /// @dev The accrual of performance fees is taken into account in the conversion.
     function _convertToShares(uint256 assets, Math.Rounding rounding) internal view override returns (uint256) {
-        (uint256 feeShares, uint256 newTotalAssets) = _accruedFeeShares();
+        (uint256 feeShares, uint256 newTotalAssets,) = _accruedFeeAndAssets();
 
         return _convertToSharesWithTotals(assets, totalSupply() + feeShares, newTotalAssets, rounding);
     }
@@ -638,7 +627,7 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
     /// @inheritdoc ERC4626
     /// @dev The accrual of performance fees is taken into account in the conversion.
     function _convertToAssets(uint256 shares, Math.Rounding rounding) internal view override returns (uint256) {
-        (uint256 feeShares, uint256 newTotalAssets) = _accruedFeeShares();
+        (uint256 feeShares, uint256 newTotalAssets,) = _accruedFeeAndAssets();
 
         return _convertToAssetsWithTotals(shares, totalSupply() + feeShares, newTotalAssets, rounding);
     }
@@ -672,7 +661,8 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
 
         _supplyMorpho(assets);
 
-        // `lastTotalAssets + assets` may be a little off from `totalAssets()`.
+        // `lastTotalAssets + assets` may be a little above `totalAssets()`.
+        // This can lead to a small accrual of `lostAssets` at the next interaction.
         _updateLastTotalAssets(lastTotalAssets + assets);
     }
 
@@ -686,6 +676,11 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
         internal
         override
     {
+        // `lastTotalAssets - assets` may be a little above `totalAssets()`.
+        // This can lead to a small accrual of `lostAssets` at the next interaction.
+        // clamp at 0 so the error raised is the more informative NotEnoughLiquidity.
+        _updateLastTotalAssets(lastTotalAssets.zeroFloorSub(assets));
+
         _withdrawMorpho(assets);
 
         super._withdraw(caller, receiver, owner, assets, shares);
@@ -878,23 +873,39 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
         emit EventsLib.UpdateLastTotalAssets(updatedTotalAssets);
     }
 
-    /// @dev Accrues the fee and mints the fee shares to the fee recipient.
-    /// @return newTotalAssets The vaults total assets after accruing the interest.
-    function _accrueFee() internal returns (uint256 newTotalAssets) {
-        uint256 feeShares;
-        (feeShares, newTotalAssets) = _accruedFeeShares();
+    /// @dev Accrues `lastTotalAssets`, `lostAssets` and mints the fee shares to the fee recipient.
+    function _accrueInterest() internal {
+        (uint256 feeShares, uint256 newTotalAssets, uint256 newLostAssets) = _accruedFeeAndAssets();
+
+        _updateLastTotalAssets(newTotalAssets);
+        lostAssets = newLostAssets;
+        emit EventsLib.UpdateLostAssets(newLostAssets);
 
         if (feeShares != 0) _mint(feeRecipient, feeShares);
 
         emit EventsLib.AccrueInterest(newTotalAssets, feeShares);
     }
 
-    /// @dev Computes and returns the fee shares (`feeShares`) to mint and the new vault's total assets
-    /// (`newTotalAssets`).
-    function _accruedFeeShares() internal view returns (uint256 feeShares, uint256 newTotalAssets) {
-        newTotalAssets = totalAssets();
+    /// @dev Computes and returns the `feeShares` to mint, the new `totalAssets` and the new `lostAssets`.
+    /// @return feeShares the shares to mint to `feeRecipient`.
+    /// @return newTotalAssets the new `totalAssets`.
+    /// @return newLostAssets the new lostAssets.
+    function _accruedFeeAndAssets() internal view returns (uint256, uint256, uint256) {
+        // The assets that the vault has on Morpho.
+        uint256 realTotalAssets;
+        for (uint256 i; i < withdrawQueue.length; ++i) {
+            realTotalAssets += MORPHO.expectedSupplyAssets(_marketParams(withdrawQueue[i]), address(this));
+        }
 
-        uint256 totalInterest = newTotalAssets.zeroFloorSub(lastTotalAssets);
+        uint256 newLostAssets;
+        // If the vault lost some assets (realTotalAssets decreased), lostAssets is increased.
+        if (realTotalAssets < lastTotalAssets - lostAssets) newLostAssets = lastTotalAssets - realTotalAssets;
+        // If it did not, lostAssets stays the same.
+        else newLostAssets = lostAssets;
+
+        uint256 newTotalAssets = realTotalAssets + newLostAssets;
+        uint256 totalInterest = newTotalAssets - lastTotalAssets;
+        uint256 feeShares;
         if (totalInterest != 0 && fee != 0) {
             // It is acknowledged that `feeAssets` may be rounded down to 0 if `totalInterest * fee < WAD`.
             uint256 feeAssets = totalInterest.mulDiv(fee, WAD);
@@ -903,5 +914,7 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
             feeShares =
                 _convertToSharesWithTotals(feeAssets, totalSupply(), newTotalAssets - feeAssets, Math.Rounding.Floor);
         }
+
+        return (feeShares, newTotalAssets, newLostAssets);
     }
 }

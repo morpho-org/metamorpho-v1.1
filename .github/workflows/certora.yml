@@ -22,6 +22,8 @@ jobs:
           - Immutability
           - LastUpdated
           - Liveness
+          - LostAssetsLink
+          - LostAssetsNoLink
           - MarketInteractions
           - PendingValues
           - Range
