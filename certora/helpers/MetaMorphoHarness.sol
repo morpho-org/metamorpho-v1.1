@@ -32,7 +32,7 @@ contract MetaMorphoHarness is MetaMorpho {
     }
 
     function minTimelock() external pure returns (uint256) {
-        return ConstantsLib.MIN_TIMELOCK;
+        return ConstantsLib.MIN_POST_INITIALIZATION_TIMELOCK;
     }
 
     function maxTimelock() external pure returns (uint256) {
