@@ -137,7 +137,7 @@ contract BaseTest is Test {
     /// @dev Bounds the initial timelock to be in the min/max range.
     function _boundTimelock(uint256 initialTimelock) internal view returns (uint256 boundedTimelock) {
         boundedTimelock = bound(initialTimelock, 0 days, ConstantsLib.MAX_TIMELOCK);
-        if (boundedTimelock < ConstantsLib.MIN_POST_INITIALIZATION_TIMELOCK) boundedTimelock = 0;
+        if (boundedTimelock < ConstantsLib.POST_INITIALIZATION_MIN_TIMELOCK) boundedTimelock = 0;
     }
 
     /// @dev Bounds the fuzzing input to a non-zero address.

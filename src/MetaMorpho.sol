@@ -146,7 +146,7 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
         MORPHO = IMorpho(morpho);
         DECIMALS_OFFSET = uint8(uint256(18).zeroFloorSub(IERC20Metadata(_asset).decimals()));
 
-        if (initialTimelock != 0 && initialTimelock < ConstantsLib.MIN_POST_INITIALIZATION_TIMELOCK) {
+        if (initialTimelock != 0 && initialTimelock < ConstantsLib.POST_INITIALIZATION_MIN_TIMELOCK) {
             revert ErrorsLib.BelowMinTimelock();
         }
         _setTimelock(initialTimelock);
@@ -247,7 +247,7 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
         if (newTimelock == timelock) revert ErrorsLib.AlreadySet();
         if (pendingTimelock.validAt != 0) revert ErrorsLib.AlreadyPending();
         if (newTimelock > ConstantsLib.MAX_TIMELOCK) revert ErrorsLib.AboveMaxTimelock();
-        if (newTimelock < ConstantsLib.MIN_POST_INITIALIZATION_TIMELOCK) revert ErrorsLib.BelowMinTimelock();
+        if (newTimelock < ConstantsLib.POST_INITIALIZATION_MIN_TIMELOCK) revert ErrorsLib.BelowMinTimelock();
 
         if (newTimelock > timelock) {
             _setTimelock(newTimelock);
