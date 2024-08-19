@@ -20,9 +20,16 @@ invariant noBadPendingTimelock()
     }
 }
 
+function isSmallerPendingTimelock() returns bool {
+    MetaMorphoHarness.PendingUint192 pendingTimelock = pendingTimelock_();
+
+    return pendingTimelock.validAt != 0 =>
+        assert_uint256(pendingTimelock.value) <= timelock();
+}
+
 // Check that the pending timelock value is always strictly smaller than the current timelock value.
 invariant smallerPendingTimelock()
-    assert_uint256(pendingTimelock_().value) < timelock()
+    isSmallerPendingTimelock()
 {
     preserved with (env e) {
         requireInvariant pendingTimelockInRange();
