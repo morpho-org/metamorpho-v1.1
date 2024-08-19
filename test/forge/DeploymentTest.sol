@@ -65,7 +65,7 @@ contract DeploymentTest is IntegrationTest {
     ) public {
         assumeNotZeroAddress(owner);
         assumeNotZeroAddress(morpho);
-        initialTimelock = _boundTimelock(initialTimelock);
+        initialTimelock = _boundInitialTimelock(initialTimelock);
 
         IMetaMorpho newVault = createMetaMorpho(owner, morpho, initialTimelock, address(loanToken), name, symbol);
 
