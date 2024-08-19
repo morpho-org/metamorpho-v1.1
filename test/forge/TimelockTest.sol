@@ -34,7 +34,7 @@ contract TimelockTest is IntegrationTest {
     }
 
     function testSubmitTimelockDecreased(uint256 timelock) public {
-        timelock = bound(timelock, ConstantsLib.POST_INITIALIZATION_MIN_TIMELOCK, TIMELOCK - 1);
+        timelock = _boundTimelock(timelock);
 
         vm.expectEmit();
         emit EventsLib.SubmitTimelock(timelock);
@@ -50,7 +50,7 @@ contract TimelockTest is IntegrationTest {
     }
 
     function testSubmitTimelockAlreadyPending(uint256 timelock) public {
-        timelock = bound(timelock, ConstantsLib.POST_INITIALIZATION_MIN_TIMELOCK, TIMELOCK - 1);
+        timelock = _boundTimelock(timelock);
 
         vm.prank(OWNER);
         vault.submitTimelock(timelock);
@@ -97,7 +97,7 @@ contract TimelockTest is IntegrationTest {
     }
 
     function testAcceptTimelock(uint256 timelock) public {
-        timelock = bound(timelock, ConstantsLib.POST_INITIALIZATION_MIN_TIMELOCK, TIMELOCK - 1);
+        timelock = _boundTimelock(timelock);
 
         vm.prank(OWNER);
         vault.submitTimelock(timelock);
@@ -122,7 +122,7 @@ contract TimelockTest is IntegrationTest {
     }
 
     function testAcceptTimelockTimelockNotElapsed(uint256 timelock, uint256 elapsed) public {
-        timelock = bound(timelock, ConstantsLib.POST_INITIALIZATION_MIN_TIMELOCK, TIMELOCK - 1);
+        timelock = _boundTimelock(timelock);
         elapsed = bound(elapsed, 1, TIMELOCK - 1);
 
         vm.prank(OWNER);
@@ -235,7 +235,7 @@ contract TimelockTest is IntegrationTest {
     }
 
     function testAcceptGuardianTimelockDecreased(uint256 timelock, uint256 elapsed) public {
-        timelock = bound(timelock, ConstantsLib.POST_INITIALIZATION_MIN_TIMELOCK, TIMELOCK - 1);
+        timelock = _boundTimelock(timelock);
         elapsed = bound(elapsed, 1, TIMELOCK - 1);
 
         vm.prank(OWNER);
@@ -392,7 +392,7 @@ contract TimelockTest is IntegrationTest {
 
     function testAcceptCapIncreasedTimelockDecreased(uint256 cap, uint256 timelock, uint256 elapsed) public {
         cap = bound(cap, CAP + 1, type(uint184).max);
-        timelock = bound(timelock, ConstantsLib.POST_INITIALIZATION_MIN_TIMELOCK, TIMELOCK - 1);
+        timelock = _boundTimelock(timelock);
         elapsed = bound(elapsed, 1, TIMELOCK - 1);
 
         vm.prank(OWNER);
