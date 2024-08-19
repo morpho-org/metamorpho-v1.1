@@ -59,7 +59,7 @@ contract IntegrationTest is BaseTest {
         return morpho.expectedSupplyAssets(idleParams, address(vault));
     }
 
-    /// @dev Bounds the timelock to be in the acceptable range after deployment.
+    /// @dev Bounds the timelock to be smaller and in the acceptable range after deployment.
     function _boundTimelock(uint256 timelock) internal view returns (uint256) {
         return bound(timelock, ConstantsLib.POST_INITIALIZATION_MIN_TIMELOCK, TIMELOCK - 1);
     }
