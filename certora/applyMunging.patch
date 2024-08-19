@@ -1,6 +1,6 @@
 diff -ruN interfaces/IMetaMorpho.sol interfaces/IMetaMorpho.sol
---- interfaces/IMetaMorpho.sol	2024-08-12 17:01:51.540516233 +0200
-+++ interfaces/IMetaMorpho.sol	2024-08-13 13:46:23.645208968 +0200
+--- interfaces/IMetaMorpho.sol	2024-08-19 09:49:47.263205040 +0200
++++ interfaces/IMetaMorpho.sol	2024-08-19 09:49:52.613179869 +0200
 @@ -1,9 +1,9 @@
  // SPDX-License-Identifier: GPL-2.0-or-later
  pragma solidity >=0.5.0;
@@ -24,8 +24,8 @@ diff -ruN interfaces/IMetaMorpho.sol interfaces/IMetaMorpho.sol
  
      /// @notice The address of the curator.
 diff -ruN libraries/ErrorsLib.sol libraries/ErrorsLib.sol
---- libraries/ErrorsLib.sol	2024-08-12 17:00:02.975663176 +0200
-+++ libraries/ErrorsLib.sol	2024-08-13 13:46:23.645208968 +0200
+--- libraries/ErrorsLib.sol	2024-08-19 09:48:53.920123241 +0200
++++ libraries/ErrorsLib.sol	2024-08-19 09:49:52.613179869 +0200
 @@ -1,7 +1,7 @@
  // SPDX-License-Identifier: GPL-2.0-or-later
  pragma solidity ^0.8.0;
@@ -36,8 +36,8 @@ diff -ruN libraries/ErrorsLib.sol libraries/ErrorsLib.sol
  /// @title ErrorsLib
  /// @author Morpho Labs
 diff -ruN libraries/EventsLib.sol libraries/EventsLib.sol
---- libraries/EventsLib.sol	2024-08-12 17:01:51.540516233 +0200
-+++ libraries/EventsLib.sol	2024-08-13 13:46:23.645208968 +0200
+--- libraries/EventsLib.sol	2024-08-19 09:49:47.263205040 +0200
++++ libraries/EventsLib.sol	2024-08-19 09:49:52.613179869 +0200
 @@ -1,7 +1,7 @@
  // SPDX-License-Identifier: GPL-2.0-or-later
  pragma solidity ^0.8.0;
@@ -48,8 +48,8 @@ diff -ruN libraries/EventsLib.sol libraries/EventsLib.sol
  import {PendingAddress} from "./PendingLib.sol";
  
 diff -ruN MetaMorpho.sol MetaMorpho.sol
---- MetaMorpho.sol	2024-08-12 17:01:51.540516233 +0200
-+++ MetaMorpho.sol	2024-08-13 13:46:23.649208876 +0200
+--- MetaMorpho.sol	2024-08-19 09:49:47.263205040 +0200
++++ MetaMorpho.sol	2024-08-19 09:49:52.613179869 +0200
 @@ -9,24 +9,22 @@
      IMetaMorphoBase,
      IMetaMorphoStaticTyping
@@ -114,9 +114,9 @@ diff -ruN MetaMorpho.sol MetaMorpho.sol
  
      /// @notice OpenZeppelin decimals offset used by the ERC4626 implementation.
      /// @dev Calculated to be max(0, 18 - underlyingDecimals) at construction, so the initial conversion rate maximizes
-@@ -110,6 +106,19 @@
-     /// @inheritdoc IMetaMorphoBase
-     uint256 public lostAssets;
+@@ -116,6 +112,19 @@
+     /// @dev "Overrides" the ERC20's storage variable to be able to modify it.
+     string private _symbol;
  
 +    // HARNESS
 +    // The index of the identifier of the last market withdrawn.
@@ -134,16 +134,16 @@ diff -ruN MetaMorpho.sol MetaMorpho.sol
      /* CONSTRUCTOR */
  
      /// @dev Initializes the contract.
-@@ -129,7 +138,7 @@
-     ) ERC4626(IERC20(_asset)) ERC20Permit(_name) ERC20(_name, _symbol) Ownable(owner) {
-         if (morpho == address(0)) revert ErrorsLib.ZeroAddress();
+@@ -143,7 +152,7 @@
+         _symbol = __symbol;
+         emit EventsLib.SetSymbol(__symbol);
  
 -        MORPHO = IMorpho(morpho);
 +        MORPHO = IMorphoHarness(morpho);
          DECIMALS_OFFSET = uint8(uint256(18).zeroFloorSub(IERC20Metadata(_asset).decimals()));
  
-         _checkTimelockBounds(initialTimelock);
-@@ -341,6 +350,9 @@
+         _setTimelock(initialTimelock);
+@@ -367,6 +376,9 @@
              seen[prevIndex] = true;
  
              newWithdrawQueue[i] = id;
@@ -153,7 +153,7 @@ diff -ruN MetaMorpho.sol MetaMorpho.sol
          }
  
          for (uint256 i; i < currLength; ++i) {
-@@ -358,6 +370,10 @@
+@@ -384,6 +396,10 @@
                      }
                  }
  
@@ -164,7 +164,7 @@ diff -ruN MetaMorpho.sol MetaMorpho.sol
                  delete config[id];
              }
          }
-@@ -735,6 +751,9 @@
+@@ -766,6 +782,9 @@
  
          if (supplyCap > 0) {
              if (!marketConfig.enabled) {
@@ -174,7 +174,7 @@ diff -ruN MetaMorpho.sol MetaMorpho.sol
                  withdrawQueue.push(id);
  
                  if (withdrawQueue.length > ConstantsLib.MAX_QUEUE_LENGTH) revert ErrorsLib.MaxQueueLengthExceeded();
-@@ -794,6 +813,9 @@
+@@ -825,6 +844,9 @@
      /// @dev Withdraws `assets` from Morpho.
      function _withdrawMorpho(uint256 assets) internal {
          for (uint256 i; i < withdrawQueue.length; ++i) {
