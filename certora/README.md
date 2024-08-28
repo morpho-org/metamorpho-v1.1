@@ -68,7 +68,7 @@ The following function defined in [`PendingValues.spec`](specs/PendingValues.spe
 
 ```solidity
 function isSmallerPendingTimelock() returns bool {
-    return assert_uint256(pendingTimelock_().value) < timelock();
+    return assert_uint256(pendingTimelock_().value) <= timelock();
 }
 ```
 
