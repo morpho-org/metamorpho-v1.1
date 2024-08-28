@@ -92,7 +92,7 @@ rule lastTotalAssetsDecreasesCorrectlyOnRedeem(env e, uint256 shares, address re
     assert to_mathint(lastTotalAssetsAfter) >= lastTotalAssetsBefore - assets;
 }
 
-ghost mathint sumBalances {
+persistent ghost mathint sumBalances {
     init_state axiom sumBalances == 0;
 }
 
