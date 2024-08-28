@@ -21,7 +21,7 @@ methods {
     function _.supplyShares(MetaMorphoHarness.Id, address) external => NONDET;
     function _.expectedSupplyAssets(MetaMorphoHarness.MarketParams, address) external => CONSTANT;
     function _.market(MetaMorphoHarness.Id) external => NONDET;
-    
+
     function _.transfer(address, uint256) external => NONDET;
     function _.transferFrom(address, address, uint256) external => NONDET;
     function _.balanceOf(address) external => NONDET;
@@ -54,10 +54,10 @@ rule lastTotalAssetsSmallerThanTotalAssets() {
     assert lastTotalAssets() <= totalAssets();
 }
 
-rule lastTotalAssetsIncreases(method f, env e, calldataarg args) 
+rule lastTotalAssetsIncreases(method f, env e, calldataarg args)
 filtered {
-    f -> f.selector != sig:withdraw(uint256, address, address).selector && 
-        f.selector != sig:redeem(uint256, address, address).selector && 
+    f -> f.selector != sig:withdraw(uint256, address, address).selector &&
+        f.selector != sig:redeem(uint256, address, address).selector &&
         f.selector != sig:updateWithdrawQueue(uint256[]).selector
 }
 {
