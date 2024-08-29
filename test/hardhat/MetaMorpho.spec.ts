@@ -283,16 +283,16 @@ describe("MetaMorpho", () => {
       await randomForwardTimestamp();
 
       const allocation = [];
-      for(let marketParams of allMarketParams) {
-          const market = await expectedMarket(marketParams);
-          const position = await morpho.position(identifier(marketParams), metaMorphoAddress);
+      for (let marketParams of allMarketParams) {
+        const market = await expectedMarket(marketParams);
+        const position = await morpho.position(identifier(marketParams), metaMorphoAddress);
 
-          allocation.push({
-            marketParams,
-            market,
-            liquidity: market.totalSupplyAssets - market.totalBorrowAssets,
-            supplyAssets: position.supplyShares.toAssetsDown(market.totalSupplyAssets, market.totalSupplyShares),
-          });
+        allocation.push({
+          marketParams,
+          market,
+          liquidity: market.totalSupplyAssets - market.totalBorrowAssets,
+          supplyAssets: position.supplyShares.toAssetsDown(market.totalSupplyAssets, market.totalSupplyShares),
+        });
       }
 
       const withdrawnAllocation = allocation.map(({ marketParams, liquidity, supplyAssets }) => {
