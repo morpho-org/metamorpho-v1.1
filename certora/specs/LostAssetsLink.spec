@@ -99,25 +99,28 @@ function summaryIdToMarketParams(MetaMorphoHarness.Id id) returns MetaMorphoHarn
 
 // Deactivated because they are timing out
 
-// Note that it implies newLostAssets <= totalAssets.
-// Note that it implies realTotalAssets + lostAssets = lastTotalAssets after accrueInterest().
-invariant realPlusLostEqualsTotal()
-filtered { f -> false }
-    realTotalAssets() + newLostAssets() == to_mathint(totalAssets());
+// // Note that it implies newLostAssets <= totalAssets.
+// // Note that it implies realTotalAssets + lostAssets = lastTotalAssets after accrueInterest().
+// invariant realPlusLostEqualsTotal()
+//     realTotalAssets() + newLostAssets() == to_mathint(totalAssets());
 
 
-// LostAssets can only change after some bad debt has been realised or a market has been forced removed.
-rule lostAssetsOnlyMovesAfterUpdateWQueueAndLiquidate(env e0, method f, env e, calldataarg args)
-filtered { f -> false }
-{
-    require e.msg.sender != currentContract;
+// // LostAssets can only change after some bad debt has been realised or a market has been forced removed.
+// rule lostAssetsOnlyMovesAfterUpdateWQueueAndLiquidate(env e0, method f, env e, calldataarg args)
+// filtered {
+//     f -> !f.isView &&
+//         f.selector != sig:MorphoHarness.liquidate(MorphoHarness.MarketParams, address, uint256, uint256, bytes).selector &&
+//         f.selector != sig:updateWithdrawQueue(uint256[]).selector
+// }
+// {
+//     require e.msg.sender != currentContract;
 
-    deposit(e0, 0, 1);
-    uint256 lostAssetsBefore = newLostAssets();
+//     deposit(e0, 0, 1);
+//     uint256 lostAssetsBefore = newLostAssets();
 
-    f(e, args);
+//     f(e, args);
 
-    uint256 lostAssetsAfter = newLostAssets();
+//     uint256 lostAssetsAfter = newLostAssets();
 
-    assert lostAssetsBefore == lostAssetsAfter;
-}
+//     assert lostAssetsBefore == lostAssetsAfter;
+// }
