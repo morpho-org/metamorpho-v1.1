@@ -66,7 +66,7 @@ function summaryExpectedSupplyAssets(MorphoHarness.MarketParams marketParams, ad
 // Metamorpho's mulDiv (from OZ).
 function summaryMulDiv(uint256 x, uint256 y, uint256 d, Math.Rounding rounding) returns uint256 {
     require d != 0;
-    
+
     if (rounding == Math.Rounding.Floor) {
         // Safe require because the reference implementation would revert.
         return require_uint256((x * y) / d);
@@ -103,28 +103,25 @@ function summaryIdToMarketParams(MetaMorphoHarness.Id id) returns MetaMorphoHarn
 
 // Deactivated because they are timing out
 
-// // Note that it implies newLostAssets <= totalAssets.
-// // Note that it implies realTotalAssets + lostAssets = lastTotalAssets after accrueInterest().
-// invariant realPlusLostEqualsTotal()
-//     realTotalAssets() + newLostAssets() == to_mathint(totalAssets());
+// Note that it implies newLostAssets <= totalAssets.
+// Note that it implies realTotalAssets + lostAssets = lastTotalAssets after accrueInterest().
+invariant realPlusLostEqualsTotal()
+filtered { f -> false }
+    realTotalAssets() + newLostAssets() == to_mathint(totalAssets());
 
 
-// // LostAssets can only change after some bad debt has been realised or a market has been forced removed.
-// rule lostAssetsOnlyMovesAfterUpdateWQueueAndLiquidate(env e0, method f, env e, calldataarg args)
-// filtered {
-//     f -> !f.isView &&
-//         f.selector != sig:MorphoHarness.liquidate(MorphoHarness.MarketParams, address, uint256, uint256, bytes).selector &&
-//         f.selector != sig:updateWithdrawQueue(uint256[]).selector
-// }
-// {
-//     require e.msg.sender != currentContract;
-    
-//     deposit(e0, 0, 1);
-//     uint256 lostAssetsBefore = newLostAssets();
+// LostAssets can only change after some bad debt has been realised or a market has been forced removed.
+rule lostAssetsOnlyMovesAfterUpdateWQueueAndLiquidate(env e0, method f, env e, calldataarg args)
+filtered { f -> false }
+{
+    require e.msg.sender != currentContract;
 
-//     f(e, args);
+    deposit(e0, 0, 1);
+    uint256 lostAssetsBefore = newLostAssets();
 
-//     uint256 lostAssetsAfter = newLostAssets();
+    f(e, args);
 
-//     assert lostAssetsBefore == lostAssetsAfter;
-// }
+    uint256 lostAssetsAfter = newLostAssets();
+
+    assert lostAssetsBefore == lostAssetsAfter;
+}
