@@ -20,9 +20,13 @@ invariant noBadPendingTimelock()
     }
 }
 
+function isSmallerPendingTimelock() returns bool {
+    return assert_uint256(pendingTimelock_().value) <= timelock();
+}
+
 // Check that the pending timelock value is always strictly smaller than the current timelock value.
 invariant smallerPendingTimelock()
-    assert_uint256(pendingTimelock_().value) < timelock()
+    isSmallerPendingTimelock()
 {
     preserved with (env e) {
         requireInvariant pendingTimelockInRange();
