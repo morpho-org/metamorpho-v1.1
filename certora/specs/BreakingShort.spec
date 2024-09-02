@@ -1,16 +1,20 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 using MorphoHarness as Morpho;
+using Util as Util;
 
 methods {
     function convertToAssets(uint256) external returns(uint256) envfree;
     function balanceOf(address) external returns(uint256) envfree;
+
     function Morpho.supplyShares(MorphoHarness.Id, address) external returns uint256 envfree;
-    function Morpho.virtualTotalSupplyAssets(MorphoHarness.Id) external returns uint256 envfree;
-    function Morpho.virtualTotalSupplyShares(MorphoHarness.Id) external returns uint256 envfree;
+    function Morpho.totalSupplyAssets(MorphoHarness.Id) external returns uint256 envfree;
+    function Morpho.totalSupplyShares(MorphoHarness.Id) external returns uint256 envfree;
     function Morpho.libMulDivDown(uint256, uint256, uint256) external returns uint256 envfree;
 
-    function _.expectedSupplyAssets(MorphoHarness.Id id, address user) external => summaryExpectedSupplyAssets(id, user) expect uint256;
+    function Util.toAssetsDown(uint256, uint256, uint256) external returns(uint256) envfree;
+
+    function _.expectedSupplyAssets(MorphoHarness.Id id, address user) external => supplyAssets(id, user) expect uint256;
 }
 
 function networth(address user) returns int256 {
@@ -20,12 +24,12 @@ function networth(address user) returns int256 {
     return require_int256(convertToAssets(assets));
 }
 
-function summaryExpectedSupplyAssets(MorphoHarness.Id id, address user) returns uint256 {
-    uint256 userShares = Morpho.supplyShares(id, user);
-    uint256 totalSupplyAssets = Morpho.virtualTotalSupplyAssets(id);
-    uint256 totalSupplyShares = Morpho.virtualTotalSupplyShares(id);
-
-    return Morpho.libMulDivDown(userShares, totalSupplyAssets, totalSupplyShares);
+function supplyAssets(MetaMorphoHarness.Id id, address user) returns uint256 {
+    uint256 shares = Morpho.supplyShares(id, user);
+    uint256 totalSupplyAssets = Morpho.totalSupplyAssets(id);
+    uint256 totalSupplyShares = Morpho.totalSupplyShares(id);
+    require shares <= totalSupplyShares;
+    return Util.toAssetsDown(shares, totalSupplyAssets, totalSupplyShares);
 }
 
 rule decreasingNetworth(env e, method f, calldataarg args, address user) {
