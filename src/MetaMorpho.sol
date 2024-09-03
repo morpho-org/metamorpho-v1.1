@@ -246,8 +246,7 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
     function submitTimelock(uint256 newTimelock) external onlyOwner {
         if (newTimelock == timelock) revert ErrorsLib.AlreadySet();
         if (pendingTimelock.validAt != 0) revert ErrorsLib.AlreadyPending();
-        if (newTimelock > ConstantsLib.MAX_TIMELOCK) revert ErrorsLib.AboveMaxTimelock();
-        if (newTimelock < ConstantsLib.POST_INITIALIZATION_MIN_TIMELOCK) revert ErrorsLib.BelowMinTimelock();
+        _checkTimelockBounds(newTimelock);
 
         if (newTimelock > timelock) {
             _setTimelock(newTimelock);
@@ -742,6 +741,12 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
         market = MORPHO.market(id);
         shares = MORPHO.supplyShares(id, address(this));
         assets = shares.toAssetsDown(market.totalSupplyAssets, market.totalSupplyShares);
+    }
+
+    /// @dev Reverts if `newTimelock` is not within the bounds.
+    function _checkTimelockBounds(uint256 newTimelock) internal pure {
+        if (newTimelock > ConstantsLib.MAX_TIMELOCK) revert ErrorsLib.AboveMaxTimelock();
+        if (newTimelock < ConstantsLib.POST_INITIALIZATION_MIN_TIMELOCK) revert ErrorsLib.BelowMinTimelock();
     }
 
     /// @dev Sets `timelock` to `newTimelock`.
