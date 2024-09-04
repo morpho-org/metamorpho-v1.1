@@ -136,6 +136,7 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
     ) ERC4626(IERC20(_asset)) ERC20Permit("") ERC20("", "") Ownable(owner) {
         if (morpho == address(0)) revert ErrorsLib.ZeroAddress();
         if (initialTimelock != 0) _checkTimelockBounds(initialTimelock);
+        _setTimelock(initialTimelock);
 
         _name = __name;
         emit EventsLib.SetName(__name);
