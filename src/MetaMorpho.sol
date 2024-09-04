@@ -135,7 +135,8 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
         string memory __symbol
     ) ERC4626(IERC20(_asset)) ERC20Permit("") ERC20("", "") Ownable(owner) {
         if (morpho == address(0)) revert ErrorsLib.ZeroAddress();
-        if (initialTimelock > ConstantsLib.MAX_TIMELOCK) revert ErrorsLib.AboveMaxTimelock();
+        if (initialTimelock != 0) _checkTimelockBounds(initialTimelock);
+        _setTimelock(initialTimelock);
 
         _name = __name;
         emit EventsLib.SetName(__name);
@@ -145,11 +146,6 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
 
         MORPHO = IMorpho(morpho);
         DECIMALS_OFFSET = uint8(uint256(18).zeroFloorSub(IERC20Metadata(_asset).decimals()));
-
-        if (initialTimelock != 0 && initialTimelock < ConstantsLib.POST_INITIALIZATION_MIN_TIMELOCK) {
-            revert ErrorsLib.BelowMinTimelock();
-        }
-        _setTimelock(initialTimelock);
 
         IERC20(_asset).forceApprove(morpho, type(uint256).max);
     }
