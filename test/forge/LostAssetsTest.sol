@@ -252,14 +252,24 @@ contract LostAssetsTest is IntegrationTest {
     }
 
     function testCoverLostAssets(uint256 assets, uint128 expectedLostAssets) public {
-        expectedLostAssets = testLostAssetsValue(assets, expectedLostAssets);
+        assets = bound(assets, MIN_TEST_ASSETS, MAX_TEST_ASSETS);
 
-        loanToken.setBalance(address(this), expectedLostAssets);
-        loanToken.approve(address(vault), assets);
-        morpho.supply(allMarkets[0], expectedLostAssets, 0, address(1), "");
+        loanToken.setBalance(SUPPLIER, assets);
 
         vm.prank(SUPPLIER);
-        vault.withdraw(assets, SUPPLIER, SUPPLIER);
+        vault.deposit(assets, ONBEHALF);
+
+        uint128 totalSupplyAssetsBefore = morpho.market(allMarkets[0].id()).totalSupplyAssets;
+        expectedLostAssets = uint128(bound(expectedLostAssets, 0, totalSupplyAssetsBefore));
+
+        _writeTotalSupplyAssets(Id.unwrap(allMarkets[0].id()), totalSupplyAssetsBefore - expectedLostAssets);
+
+        loanToken.setBalance(address(this), expectedLostAssets);
+        loanToken.approve(address(vault), expectedLostAssets);
+        vault.deposit(expectedLostAssets, address(1));
+
+        vm.prank(ONBEHALF);
+        vault.withdraw(assets, ONBEHALF, ONBEHALF);
     }
 
     function testSupplyCanCreateLostAssets() public {
