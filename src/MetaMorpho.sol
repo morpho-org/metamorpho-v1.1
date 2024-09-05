@@ -928,11 +928,10 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
             realTotalAssets += MORPHO.expectedSupplyAssets(_marketParams(withdrawQueue[i]), address(this));
         }
 
-        uint256 newLostAssets;
-        // If the vault lost some assets (realTotalAssets decreased), lostAssets is increased.
-        if (realTotalAssets < lastTotalAssets - lostAssets) newLostAssets = lastTotalAssets - realTotalAssets;
-        // If it did not, lostAssets stays the same.
-        else newLostAssets = lostAssets;
+        // If the vault lost some assets (realTotalAssets decreased), lostAssets is increased. If it did not, lostAssets
+        // stays the same.
+        uint256 newLostAssets =
+            realTotalAssets < lastTotalAssets - lostAssets ? lastTotalAssets - realTotalAssets : lostAssets;
 
         uint256 newTotalAssets = realTotalAssets + newLostAssets;
         uint256 totalInterest = newTotalAssets - lastTotalAssets;
