@@ -19,24 +19,20 @@ methods {
     function MetaMorpho._convertToAssetsWithTotals(uint256, uint256, uint256, Math.Rounding) internal returns (uint256) => NONDET;
     function MetaMorpho._convertToSharesWithTotals(uint256, uint256, uint256, Math.Rounding) internal returns (uint256) => NONDET;
 
-    // Summaries.
     function _.expectedSupplyAssets(MorphoHarness.MarketParams marketParams, address user) external => summaryExpectedSupplyAssets(marketParams, user) expect (uint256);
     function _.idToMarketParams(MetaMorphoHarness.Id id) external => summaryIdToMarketParams(id) expect MetaMorphoHarness.MarketParams ALL;
     function _.mulDiv(uint256 x, uint256 y, uint256 denominator, Math.Rounding rounding) internal => summaryMulDiv(x, y, denominator, rounding) expect (uint256);
 
-    // We assume that the erc20 is view. It's ok as we don't care about what happens in the token.
+    // We assume that the erc20 is view since what happens in the token is not relevant.
     function _.transfer(address, uint256) external => NONDET;
     function _.transferFrom(address, address, uint256) external => NONDET;
     function _.balanceOf(address) external => NONDET;
 
-    // We assume that the IRM and oracle are view.
+    // The IRM and oracle are view.
     function _.borrowRate(MorphoHarness.MarketParams, MorphoHarness.Market) external => NONDET;
     function _.price() external => NONDET;
 
-    // We deactivate callbacks.
-    // Ideally we can assume that they can't change arbitrarily the storage of Morpho
-    // and Metamorpho, but can only reenter through public entry-points, but I don't
-    // know how to do this.
+    // We assume that there are no callbacks.
     function _.onMorphoSupply(uint256, bytes) external => NONDET;
     function _.onMorphoRepay(uint256, bytes) external => NONDET;
     function _.onMorphoSupplyCollateral(uint256, bytes) external => NONDET;
@@ -66,7 +62,7 @@ function summaryExpectedSupplyAssets(MorphoHarness.MarketParams marketParams, ad
 // Metamorpho's mulDiv (from OZ).
 function summaryMulDiv(uint256 x, uint256 y, uint256 d, Math.Rounding rounding) returns uint256 {
     require d != 0;
-    
+
     if (rounding == Math.Rounding.Floor) {
         // Safe require because the reference implementation would revert.
         return require_uint256((x * y) / d);
@@ -118,7 +114,7 @@ function summaryIdToMarketParams(MetaMorphoHarness.Id id) returns MetaMorphoHarn
 // }
 // {
 //     require e.msg.sender != currentContract;
-    
+
 //     deposit(e0, 0, 1);
 //     uint256 lostAssetsBefore = newLostAssets();
 

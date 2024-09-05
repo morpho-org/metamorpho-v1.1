@@ -135,6 +135,7 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
         string memory __symbol
     ) ERC4626(IERC20(_asset)) ERC20Permit("") ERC20("", "") Ownable(owner) {
         if (morpho == address(0)) revert ErrorsLib.ZeroAddress();
+        if (initialTimelock > ConstantsLib.MAX_TIMELOCK) revert ErrorsLib.AboveMaxTimelock();
 
         _name = __name;
         emit EventsLib.SetName(__name);
@@ -145,7 +146,9 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
         MORPHO = IMorpho(morpho);
         DECIMALS_OFFSET = uint8(uint256(18).zeroFloorSub(IERC20Metadata(_asset).decimals()));
 
-        _checkTimelockBounds(initialTimelock);
+        if (initialTimelock != 0 && initialTimelock < ConstantsLib.POST_INITIALIZATION_MIN_TIMELOCK) {
+            revert ErrorsLib.BelowMinTimelock();
+        }
         _setTimelock(initialTimelock);
 
         IERC20(_asset).forceApprove(morpho, type(uint256).max);
@@ -243,7 +246,8 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
     function submitTimelock(uint256 newTimelock) external onlyOwner {
         if (newTimelock == timelock) revert ErrorsLib.AlreadySet();
         if (pendingTimelock.validAt != 0) revert ErrorsLib.AlreadyPending();
-        _checkTimelockBounds(newTimelock);
+        if (newTimelock > ConstantsLib.MAX_TIMELOCK) revert ErrorsLib.AboveMaxTimelock();
+        if (newTimelock < ConstantsLib.POST_INITIALIZATION_MIN_TIMELOCK) revert ErrorsLib.BelowMinTimelock();
 
         if (newTimelock > timelock) {
             _setTimelock(newTimelock);
@@ -694,7 +698,8 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
 
         _supplyMorpho(assets);
 
-        // `lastTotalAssets + assets` may be a little off from `totalAssets()`.
+        // `lastTotalAssets + assets` may be a little above `totalAssets()`.
+        // This can lead to a small accrual of `lostAssets` at the next interaction.
         _updateLastTotalAssets(lastTotalAssets + assets);
     }
 
@@ -708,8 +713,10 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
         internal
         override
     {
-        // `lastTotalAssets - assets` may be a little off from `totalAssets()`.
-        _updateLastTotalAssets(lastTotalAssets - assets);
+        // `lastTotalAssets - assets` may be a little above `totalAssets()`.
+        // This can lead to a small accrual of `lostAssets` at the next interaction.
+        // clamp at 0 so the error raised is the more informative NotEnoughLiquidity.
+        _updateLastTotalAssets(lastTotalAssets.zeroFloorSub(assets));
 
         _withdrawMorpho(assets);
 
@@ -735,12 +742,6 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
         market = MORPHO.market(id);
         shares = MORPHO.supplyShares(id, address(this));
         assets = shares.toAssetsDown(market.totalSupplyAssets, market.totalSupplyShares);
-    }
-
-    /// @dev Reverts if `newTimelock` is not within the bounds.
-    function _checkTimelockBounds(uint256 newTimelock) internal pure {
-        if (newTimelock > ConstantsLib.MAX_TIMELOCK) revert ErrorsLib.AboveMaxTimelock();
-        if (newTimelock < ConstantsLib.MIN_TIMELOCK) revert ErrorsLib.BelowMinTimelock();
     }
 
     /// @dev Sets `timelock` to `newTimelock`.

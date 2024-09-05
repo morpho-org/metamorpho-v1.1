@@ -5,9 +5,7 @@ import "./BaseTest.sol";
 import {MetaMorpho} from "../../../src/MetaMorpho.sol";
 
 contract InternalTest is BaseTest, MetaMorpho {
-    constructor()
-        MetaMorpho(OWNER, address(morpho), ConstantsLib.MIN_TIMELOCK, address(loanToken), "MetaMorpho Vault", "MM")
-    {}
+    constructor() MetaMorpho(OWNER, address(morpho), 1 days, address(loanToken), "MetaMorpho Vault", "MM") {}
 
     function setUp() public virtual override {
         super.setUp();

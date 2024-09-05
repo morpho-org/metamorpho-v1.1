@@ -44,7 +44,7 @@ contract DeploymentTest is IntegrationTest {
 
     function testDeployMetaMorphoAddresssZero() public {
         vm.expectRevert(ErrorsLib.ZeroAddress.selector);
-        createMetaMorpho(OWNER, address(0), ConstantsLib.MIN_TIMELOCK, address(loanToken), "MetaMorpho Vault", "MMV");
+        createMetaMorpho(OWNER, address(0), 1 days, address(loanToken), "MetaMorpho Vault", "MMV");
     }
 
     function testDeployMetaMorphoNotToken(address notToken) public {
@@ -53,7 +53,7 @@ contract DeploymentTest is IntegrationTest {
         vm.assume(address(notToken) != address(vault));
 
         vm.expectRevert();
-        createMetaMorpho(OWNER, address(morpho), ConstantsLib.MIN_TIMELOCK, notToken, "MetaMorpho Vault", "MMV");
+        createMetaMorpho(OWNER, address(morpho), 1 days, notToken, "MetaMorpho Vault", "MMV");
     }
 
     function testDeployMetaMorpho(
@@ -65,7 +65,7 @@ contract DeploymentTest is IntegrationTest {
     ) public {
         assumeNotZeroAddress(owner);
         assumeNotZeroAddress(morpho);
-        initialTimelock = bound(initialTimelock, ConstantsLib.MIN_TIMELOCK, ConstantsLib.MAX_TIMELOCK);
+        initialTimelock = _boundInitialTimelock(initialTimelock);
 
         IMetaMorpho newVault = createMetaMorpho(owner, morpho, initialTimelock, address(loanToken), name, symbol);
 

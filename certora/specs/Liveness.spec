@@ -56,6 +56,8 @@ rule canForceRemoveMarket(MetaMorphoHarness.MarketParams marketParams) {
     requireInvariant timelockInRange();
     // Safe require as it corresponds to some time very far into the future.
     require e3.block.timestamp < 2^63;
+    // Safe require as it corresponds to some time very far into the past.
+    require e3.block.timestamp > 0;
     submitMarketRemoval@withrevert(e3, marketParams);
     assert !lastReverted;
 
