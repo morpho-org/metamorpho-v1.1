@@ -251,7 +251,18 @@ contract LostAssetsTest is IntegrationTest {
         assertEq(vault.lostAssets(), assets0);
     }
 
-    function testDontCreateLostAssets() public {
+    function testCoverLostAssets(uint256 assets, uint128 expectedLostAssets) public {
+        expectedLostAssets = testLostAssetsValue(assets, expectedLostAssets);
+
+        loanToken.setBalance(address(this), expectedLostAssets);
+        loanToken.approve(address(vault), assets);
+        morpho.supply(allMarkets[0], expectedLostAssets, 0, address(1), "");
+
+        vm.prank(SUPPLIER);
+        vault.withdraw(assets, SUPPLIER, SUPPLIER);
+    }
+
+    function testSupplyCanCreateLostAssets() public {
         _setCap(allMarkets[0], type(uint128).max);
         Id[] memory supplyQueue = new Id[](1);
         supplyQueue[0] = allMarkets[0].id();
@@ -260,7 +271,6 @@ contract LostAssetsTest is IntegrationTest {
 
         uint256 assets0 = 1 ether;
 
-        loanToken.setBalance(address(this), 1 ether);
         loanToken.setBalance(SUPPLIER, assets0);
         collateralToken.setBalance(BORROWER, type(uint128).max);
 
@@ -277,26 +287,47 @@ contract LostAssetsTest is IntegrationTest {
         vm.warp(block.timestamp + 1000);
         morpho.accrueInterest(allMarkets[0]);
 
-        console.log("Depositing 2 assets in vault.");
-        console.log("");
+        loanToken.setBalance(address(this), 2);
         vault.deposit(2, address(this));
-
-        console.log("morpho.assets(vault)   : %s", morpho.expectedSupplyAssets(allMarkets[0], address(vault)));
-        console.log("vault.balanceOf(this)  : %s", vault.balanceOf(address(this)));
-        console.log("vault.lastTotalAssets(): %s", vault.lastTotalAssets());
-        console.log("vault.lostAssets()     : %s", vault.lostAssets());
-
-        console.log("");
-        console.log("Updating vault.");
-        console.log("");
 
         vault.deposit(0, address(this));
 
-        console.log("morpho.assets(vault)   : %s", morpho.expectedSupplyAssets(allMarkets[0], address(vault)));
-        console.log("vault.balanceOf(this)  : %s", vault.balanceOf(address(this)));
-        console.log("vault.lastTotalAssets(): %s", vault.lastTotalAssets());
-        console.log("vault.lostAssets()     : %s", vault.lostAssets());
+        assertEq(vault.lostAssets(), 1);
+    }
 
-        assertEq(vault.lostAssets(), 0);
+    function testWithdrawCanCreateLostAssets() public {
+        uint256 assets = 68398999741522940;
+        uint128 newTotalSupplyAssets = 615590997673706468;
+
+        _setCap(allMarkets[0], type(uint128).max);
+        Id[] memory supplyQueue = new Id[](1);
+        supplyQueue[0] = allMarkets[0].id();
+        vm.prank(CURATOR);
+        vault.setSupplyQueue(supplyQueue);
+
+        loanToken.setBalance(address(this), assets);
+        vault.deposit(assets, address(this));
+
+        collateralToken.setBalance(BORROWER, type(uint128).max);
+        vm.startPrank(BORROWER);
+        morpho.supplyCollateral(allMarkets[0], type(uint128).max, BORROWER, hex"");
+        morpho.borrow(allMarkets[0], assets, 0, BORROWER, BORROWER);
+        vm.stopPrank();
+
+        // WARP
+        _writeTotalSupplyAssets(Id.unwrap(allMarkets[0].id()), newTotalSupplyAssets);
+
+        loanToken.setBalance(BORROWER, type(uint256).max);
+        vm.startPrank(BORROWER);
+        loanToken.approve(address(morpho), type(uint256).max);
+        morpho.repay(allMarkets[0], 0, morpho.position(allMarkets[0].id(), BORROWER).borrowShares, BORROWER, hex"");
+        vm.stopPrank();
+
+        vault.withdraw(vault.maxWithdraw(address(this)) - 1, address(this), address(this));
+
+        // Call to update lostAssets.
+        vault.deposit(0, address(this));
+
+        assertEq(vault.lostAssets(), 1);
     }
 }
