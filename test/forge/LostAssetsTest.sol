@@ -344,6 +344,7 @@ contract LostAssetsTest is IntegrationTest {
     }
 
     function testWithdrawCanCreateLostAssets() public {
+        // Values found by fuzzing.
         uint256 assets = 68398999741522940;
         uint128 newTotalSupplyAssets = 615590997673706468;
 
