@@ -78,6 +78,8 @@ interface IMetaMorphoBase {
     /// @notice Stores the missing assets due to realized bad debt or forced market removal.
     /// @dev In order to cover those lost assets, it is advised to supply on behalf of address(1) on the vault
     /// (canonical method).
+    /// @dev Looking only at this variable's value and at address(1)'s balance is not enough to assess the health of the
+    /// vault, because there could be some pending (about to be realised) bad debt on its markets.
     function lostAssets() external view returns (uint256);
 
     /// @notice Submits a `newTimelock`.
