@@ -921,22 +921,24 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
     /// @return feeShares the shares to mint to `feeRecipient`.
     /// @return newTotalAssets the new `totalAssets`.
     /// @return newLostAssets the new lostAssets.
-    function _accruedFeeAndAssets() internal view returns (uint256, uint256, uint256) {
+    function _accruedFeeAndAssets()
+        internal
+        view
+        returns (uint256 feeShares, uint256 newTotalAssets, uint256 newLostAssets)
+    {
         // The assets that the vault has on Morpho.
         uint256 realTotalAssets;
         for (uint256 i; i < withdrawQueue.length; ++i) {
             realTotalAssets += MORPHO.expectedSupplyAssets(_marketParams(withdrawQueue[i]), address(this));
         }
 
-        uint256 newLostAssets;
         // If the vault lost some assets (realTotalAssets decreased), lostAssets is increased.
         if (realTotalAssets < lastTotalAssets - lostAssets) newLostAssets = lastTotalAssets - realTotalAssets;
         // If it did not, lostAssets stays the same.
         else newLostAssets = lostAssets;
 
-        uint256 newTotalAssets = realTotalAssets + newLostAssets;
+        newTotalAssets = realTotalAssets + newLostAssets;
         uint256 totalInterest = newTotalAssets - lastTotalAssets;
-        uint256 feeShares;
         if (totalInterest != 0 && fee != 0) {
             // It is acknowledged that `feeAssets` may be rounded down to 0 if `totalInterest * fee < WAD`.
             uint256 feeAssets = totalInterest.mulDiv(fee, WAD);
@@ -945,7 +947,5 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
             feeShares =
                 _convertToSharesWithTotals(feeAssets, totalSupply(), newTotalAssets - feeAssets, Math.Rounding.Floor);
         }
-
-        return (feeShares, newTotalAssets, newLostAssets);
     }
 }
