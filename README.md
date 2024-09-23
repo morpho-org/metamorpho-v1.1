@@ -51,6 +51,7 @@ It can:
 - [Timelocked if already set] Set the guardian.
 - Set the performance fee (capped at 50%).
 - Set the fee recipient.
+- Set the name and symbol of the vault.
 
 #### Curator
 
