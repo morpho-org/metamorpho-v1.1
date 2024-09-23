@@ -126,6 +126,7 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
     /// @param __name The name of the vault.
     /// @param __symbol The symbol of the vault.
     /// @dev We pass "" as name and symbol to the ERC20 because these are overriden in this contract.
+    /// This means that the contract deviates slightly from the ERC2612 standard.
     constructor(
         address owner,
         address morpho,
