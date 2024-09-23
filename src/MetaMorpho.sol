@@ -609,6 +609,8 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
     }
 
     /// @inheritdoc IERC4626
+    /// @dev totalAssets is the sum of the vault's assets on the Morpho markets plus the lost assets (see corresponding
+    /// docs in IMetaMorpho.sol).
     function totalAssets() public view override returns (uint256) {
         (, uint256 newTotalAssets,) = _accruedFeeAndAssets();
 
