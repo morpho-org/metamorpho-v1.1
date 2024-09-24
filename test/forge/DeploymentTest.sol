@@ -39,7 +39,7 @@ contract DeploymentTest is IntegrationTest {
 
     function testSetSymbolNotOwner(string memory name) public {
         vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, address(this)));
-        vault.setName(name);
+        vault.setSymbol(name);
     }
 
     function testDeployMetaMorphoAddresssZero() public {
