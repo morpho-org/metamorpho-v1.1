@@ -41,9 +41,17 @@ function isPendingTimelockInRange() returns bool {
 invariant pendingTimelockInRange()
     isPendingTimelockInRange();
 
-// Check that the timelock is bounded by the min timelock and the max timelock.
+function isTimelockInRange() returns bool {
+    uint256 timelock = timelock();
+
+    return timelock == 0 ||
+        (timelock <= maxTimelock() &&
+        timelock >= minTimelock());
+}
+
+// Check that the timelock is bounded by the max timelock.
 invariant timelockInRange()
-    timelock() <= maxTimelock() && timelock() >= minTimelock()
+    isTimelockInRange()
 {
     preserved {
         requireInvariant pendingTimelockInRange();

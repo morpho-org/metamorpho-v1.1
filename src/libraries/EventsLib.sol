@@ -10,6 +10,12 @@ import {PendingAddress} from "./PendingLib.sol";
 /// @custom:contact security@morpho.org
 /// @notice Library exposing events.
 library EventsLib {
+    /// @notice Emitted when the name of the vault is set.
+    event SetName(string name);
+
+    /// @notice Emitted when the symbol of the vault is set.
+    event SetSymbol(string symbol);
+
     /// @notice Emitted when a pending `newTimelock` is submitted.
     event SubmitTimelock(uint256 newTimelock);
 
@@ -39,6 +45,9 @@ library EventsLib {
 
     /// @notice Emitted when the vault's last total assets is updated to `updatedTotalAssets`.
     event UpdateLastTotalAssets(uint256 updatedTotalAssets);
+
+    /// @notice Emitted when the vault's lostAssets is updated to `newLostAssets`.
+    event UpdateLostAssets(uint256 newLostAssets);
 
     /// @notice Emitted when the market identified by `id` is submitted for removal.
     event SubmitMarketRemoval(address indexed caller, Id indexed id);

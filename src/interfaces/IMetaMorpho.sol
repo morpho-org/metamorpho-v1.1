@@ -75,6 +75,11 @@ interface IMetaMorphoBase {
     /// triggered (deposit/mint/withdraw/redeem/setFee/setFeeRecipient).
     function lastTotalAssets() external view returns (uint256);
 
+    /// @notice Stores the missing assets due to realized bad debt or forced market removal.
+    /// @dev In order to cover those lost assets, it is advised to supply on behalf of address(1) on the vault
+    /// (canonical method).
+    function lostAssets() external view returns (uint256);
+
     /// @notice Submits a `newTimelock`.
     /// @dev Warning: Reverts if a timelock is already pending. Revoke the pending timelock to overwrite it.
     /// @dev In case the new timelock is higher than the current one, the timelock is set immediately.
@@ -114,6 +119,12 @@ interface IMetaMorphoBase {
     /// @notice Revokes the pending removal of the market defined by `id`.
     /// @dev Does not revert if there is no pending market removal.
     function revokePendingMarketRemoval(Id id) external;
+
+    /// @notice Sets the name of the vault.
+    function setName(string memory newName) external;
+
+    /// @notice Sets the symbol of the vault.
+    function setSymbol(string memory newSymbol) external;
 
     /// @notice Submits a `newGuardian`.
     /// @notice Warning: a malicious guardian could disrupt the vault's operation, and would have the power to revoke

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
-pragma solidity 0.8.21;
+pragma solidity 0.8.26;
 
 import {
     Math, MetaMorpho, Id, ConstantsLib, PendingUint192, PendingAddress, MarketConfig
@@ -32,7 +32,7 @@ contract MetaMorphoHarness is MetaMorpho {
     }
 
     function minTimelock() external pure returns (uint256) {
-        return ConstantsLib.MIN_TIMELOCK;
+        return ConstantsLib.POST_INITIALIZATION_MIN_TIMELOCK;
     }
 
     function maxTimelock() external pure returns (uint256) {
@@ -84,5 +84,23 @@ contract MetaMorphoHarness is MetaMorpho {
 
         uint256 removableAt = config[id].removableAt;
         if (removableAt != 0) nextTime = Math.min(nextTime, removableAt);
+    }
+
+    function realTotalAssets() public view returns (uint256) {
+        uint256 realTotalAssets;
+        for (uint256 i; i < withdrawQueue.length; ++i) {
+            realTotalAssets += MORPHO.expectedSupplyAssets(_marketParams(withdrawQueue[i]), address(this));
+        }
+        return realTotalAssets;
+    }
+
+    function newLostAssets() external view returns (uint256) {
+        uint256 realTotalAssets = realTotalAssets();
+
+        uint256 newLostAssets;
+        if (realTotalAssets < lastTotalAssets - lostAssets) newLostAssets = lastTotalAssets - realTotalAssets;
+        else newLostAssets = lostAssets;
+
+        return newLostAssets;
     }
 }

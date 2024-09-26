@@ -41,8 +41,8 @@ contract IntegrationTest is BaseTest {
     }
 
     // Deploy MetaMorpho from artifacts
-    // Replaces using `new MetaMorpho` which would force 0.8.21 on all tests
-    // (since MetaMorpho has pragma solidity 0.8.21)
+    // Replaces using `new MetaMorpho` which would force 0.8.26 on all tests
+    // (since MetaMorpho has pragma solidity 0.8.26)
     function createMetaMorpho(
         address owner,
         address morpho,
@@ -57,6 +57,17 @@ contract IntegrationTest is BaseTest {
 
     function _idle() internal view returns (uint256) {
         return morpho.expectedSupplyAssets(idleParams, address(vault));
+    }
+
+    /// @dev Bounds the timelock to be smaller and in the acceptable range after deployment.
+    function _boundTimelock(uint256 timelock) internal view returns (uint256) {
+        return bound(timelock, ConstantsLib.POST_INITIALIZATION_MIN_TIMELOCK, TIMELOCK - 1);
+    }
+
+    /// @dev Bounds the initial timelock to be in the acceptable range at deployment.
+    function _boundInitialTimelock(uint256 initialTimelock) internal view returns (uint256 boundedTimelock) {
+        boundedTimelock = bound(initialTimelock, 0 days, ConstantsLib.MAX_TIMELOCK);
+        if (boundedTimelock < ConstantsLib.POST_INITIALIZATION_MIN_TIMELOCK) boundedTimelock = 0;
     }
 
     function _setTimelock(uint256 newTimelock) internal {
