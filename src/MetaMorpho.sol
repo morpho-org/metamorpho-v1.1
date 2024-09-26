@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
-pragma solidity 0.8.21;
+pragma solidity 0.8.26;
 
 import {
     MarketConfig,
@@ -110,6 +110,12 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
     /// @inheritdoc IMetaMorphoBase
     uint256 public lostAssets;
 
+    /// @dev "Overrides" the ERC20's storage variable to be able to modify it.
+    string private _name;
+
+    /// @dev "Overrides" the ERC20's storage variable to be able to modify it.
+    string private _symbol;
+
     /* CONSTRUCTOR */
 
     /// @dev Initializes the contract.
@@ -117,23 +123,30 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
     /// @param morpho The address of the Morpho contract.
     /// @param initialTimelock The initial timelock.
     /// @param _asset The address of the underlying asset.
-    /// @param _name The name of the vault.
-    /// @param _symbol The symbol of the vault.
+    /// @param __name The name of the vault.
+    /// @param __symbol The symbol of the vault.
+    /// @dev We pass "" as name and symbol to the ERC20 because these are overriden in this contract.
+    /// This means that the contract deviates slightly from the ERC2612 standard.
     constructor(
         address owner,
         address morpho,
         uint256 initialTimelock,
         address _asset,
-        string memory _name,
-        string memory _symbol
-    ) ERC4626(IERC20(_asset)) ERC20Permit(_name) ERC20(_name, _symbol) Ownable(owner) {
+        string memory __name,
+        string memory __symbol
+    ) ERC4626(IERC20(_asset)) ERC20Permit("") ERC20("", "") Ownable(owner) {
         if (morpho == address(0)) revert ErrorsLib.ZeroAddress();
+        if (initialTimelock != 0) _checkTimelockBounds(initialTimelock);
+        _setTimelock(initialTimelock);
+
+        _name = __name;
+        emit EventsLib.SetName(__name);
+
+        _symbol = __symbol;
+        emit EventsLib.SetSymbol(__symbol);
 
         MORPHO = IMorpho(morpho);
         DECIMALS_OFFSET = uint8(uint256(18).zeroFloorSub(IERC20Metadata(_asset).decimals()));
-
-        _checkTimelockBounds(initialTimelock);
-        _setTimelock(initialTimelock);
 
         IERC20(_asset).forceApprove(morpho, type(uint256).max);
     }
@@ -186,6 +199,18 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
     }
 
     /* ONLY OWNER FUNCTIONS */
+
+    function setName(string memory newName) external onlyOwner {
+        _name = newName;
+
+        emit EventsLib.SetName(newName);
+    }
+
+    function setSymbol(string memory newSymbol) external onlyOwner {
+        _symbol = newSymbol;
+
+        emit EventsLib.SetSymbol(newSymbol);
+    }
 
     /// @inheritdoc IMetaMorphoBase
     function setCurator(address newCurator) external onlyOwner {
@@ -500,6 +525,14 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
         return ERC4626.decimals();
     }
 
+    function name() public view override(IERC20Metadata, ERC20) returns (string memory) {
+        return _name;
+    }
+
+    function symbol() public view override(IERC20Metadata, ERC20) returns (string memory) {
+        return _symbol;
+    }
+
     /// @inheritdoc IERC4626
     /// @dev Warning: May be higher than the actual max deposit due to duplicate markets in the supplyQueue.
     function maxDeposit(address) public view override returns (uint256) {
@@ -571,6 +604,8 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
     }
 
     /// @inheritdoc IERC4626
+    /// @dev totalAssets is the sum of the vault's assets on the Morpho markets plus the lost assets (see corresponding
+    /// docs in IMetaMorpho.sol).
     function totalAssets() public view override returns (uint256) {
         (, uint256 newTotalAssets,) = _accruedFeeAndAssets();
 
@@ -661,7 +696,8 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
 
         _supplyMorpho(assets);
 
-        // `lastTotalAssets + assets` may be a little off from `totalAssets()`.
+        // `lastTotalAssets + assets` may be a little above `totalAssets()`.
+        // This can lead to a small accrual of `lostAssets` at the next interaction.
         _updateLastTotalAssets(lastTotalAssets + assets);
     }
 
@@ -675,8 +711,10 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
         internal
         override
     {
-        // `lastTotalAssets - assets` may be a little off from `totalAssets()`.
-        _updateLastTotalAssets(lastTotalAssets - assets);
+        // `lastTotalAssets - assets` may be a little above `totalAssets()`.
+        // This can lead to a small accrual of `lostAssets` at the next interaction.
+        // clamp at 0 so the error raised is the more informative NotEnoughLiquidity.
+        _updateLastTotalAssets(lastTotalAssets.zeroFloorSub(assets));
 
         _withdrawMorpho(assets);
 
@@ -707,7 +745,7 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
     /// @dev Reverts if `newTimelock` is not within the bounds.
     function _checkTimelockBounds(uint256 newTimelock) internal pure {
         if (newTimelock > ConstantsLib.MAX_TIMELOCK) revert ErrorsLib.AboveMaxTimelock();
-        if (newTimelock < ConstantsLib.MIN_TIMELOCK) revert ErrorsLib.BelowMinTimelock();
+        if (newTimelock < ConstantsLib.POST_INITIALIZATION_MIN_TIMELOCK) revert ErrorsLib.BelowMinTimelock();
     }
 
     /// @dev Sets `timelock` to `newTimelock`.
@@ -887,22 +925,24 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
     /// @return feeShares the shares to mint to `feeRecipient`.
     /// @return newTotalAssets the new `totalAssets`.
     /// @return newLostAssets the new lostAssets.
-    function _accruedFeeAndAssets() internal view returns (uint256, uint256, uint256) {
+    function _accruedFeeAndAssets()
+        internal
+        view
+        returns (uint256 feeShares, uint256 newTotalAssets, uint256 newLostAssets)
+    {
         // The assets that the vault has on Morpho.
         uint256 realTotalAssets;
         for (uint256 i; i < withdrawQueue.length; ++i) {
             realTotalAssets += MORPHO.expectedSupplyAssets(_marketParams(withdrawQueue[i]), address(this));
         }
 
-        uint256 newLostAssets;
         // If the vault lost some assets (realTotalAssets decreased), lostAssets is increased.
         if (realTotalAssets < lastTotalAssets - lostAssets) newLostAssets = lastTotalAssets - realTotalAssets;
         // If it did not, lostAssets stays the same.
         else newLostAssets = lostAssets;
 
-        uint256 newTotalAssets = realTotalAssets + newLostAssets;
+        newTotalAssets = realTotalAssets + newLostAssets;
         uint256 totalInterest = newTotalAssets - lastTotalAssets;
-        uint256 feeShares;
         if (totalInterest != 0 && fee != 0) {
             // It is acknowledged that `feeAssets` may be rounded down to 0 if `totalInterest * fee < WAD`.
             uint256 feeAssets = totalInterest.mulDiv(fee, WAD);
@@ -911,7 +951,5 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
             feeShares =
                 _convertToSharesWithTotals(feeAssets, totalSupply(), newTotalAssets - feeAssets, Math.Rounding.Floor);
         }
-
-        return (feeShares, newTotalAssets, newLostAssets);
     }
 }

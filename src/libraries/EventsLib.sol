@@ -10,6 +10,12 @@ import {PendingAddress} from "./PendingLib.sol";
 /// @custom:contact security@morpho.org
 /// @notice Library exposing events.
 library EventsLib {
+    /// @notice Emitted when the name of the vault is set.
+    event SetName(string name);
+
+    /// @notice Emitted when the symbol of the vault is set.
+    event SetSymbol(string symbol);
+
     /// @notice Emitted when a pending `newTimelock` is submitted.
     event SubmitTimelock(uint256 newTimelock);
 

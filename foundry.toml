@@ -2,7 +2,7 @@
 src = "src"
 test = "test/forge"
 libs = ["lib"]
-evm_version = "paris"
+evm_version = "cancun"
 fs_permissions = [
     { access = "read", path = "./config/"},
     { access = "read", path = "./out/"}

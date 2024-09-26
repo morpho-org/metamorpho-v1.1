@@ -36,7 +36,17 @@ jobs:
         with:
           submodules: recursive
 
-      - uses: ./.github/actions/install-cache
+      - uses: ./.github/actions/install
+
+      - name: Restore forge compilation cache
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            cache
+            out
+          restore-keys: |
+            forge-${{ github.base_ref }}
+            forge-
 
       - name: Build contracts without IR
         run: yarn build:forge
@@ -44,12 +54,12 @@ jobs:
           FOUNDRY_PROFILE: test
 
       - name: Save forge compilation cache
-        uses: actions/cache/save@v3
+        uses: actions/cache/save@v4
         with:
           path: |
             cache
             out
-          key: forge-${{ github.ref_name }}
+          key: forge-${{ github.ref_name }}-${{ github.run_id }}
 
   test:
     needs: build-no-ir

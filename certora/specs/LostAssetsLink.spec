@@ -14,23 +14,35 @@ methods {
     function newLostAssets() external returns(uint256) envfree;
     function MORPHO() external returns(address) envfree;
 
+<<<<<<< HEAD
     // Summaries.
+||||||| 7c54e1f
+    function MetaMorpho._convertToAssets(uint256,Math.Rounding) internal returns (uint256) => NONDET /* difficulty 127 */;
+    function MetaMorpho._convertToShares(uint256,Math.Rounding) internal returns (uint256) => NONDET /* difficulty 127 */;
+    function MetaMorpho._convertToAssetsWithTotals(uint256, uint256, uint256, Math.Rounding) internal returns (uint256) => NONDET;
+    function MetaMorpho._convertToSharesWithTotals(uint256, uint256, uint256, Math.Rounding) internal returns (uint256) => NONDET;
+
+    // Summaries.
+=======
+    function MetaMorpho._convertToAssets(uint256,Math.Rounding) internal returns (uint256) => NONDET /* difficulty 127 */;
+    function MetaMorpho._convertToShares(uint256,Math.Rounding) internal returns (uint256) => NONDET /* difficulty 127 */;
+    function MetaMorpho._convertToAssetsWithTotals(uint256, uint256, uint256, Math.Rounding) internal returns (uint256) => NONDET;
+    function MetaMorpho._convertToSharesWithTotals(uint256, uint256, uint256, Math.Rounding) internal returns (uint256) => NONDET;
+
+>>>>>>> main
     function _.expectedSupplyAssets(MorphoHarness.MarketParams marketParams, address user) external => summaryExpectedSupplyAssets(marketParams, user) expect (uint256);
     function _.idToMarketParams(MetaMorphoHarness.Id id) external => summaryIdToMarketParams(id) expect MetaMorphoHarness.MarketParams ALL;
 
-    // We assume that the erc20 is view. It's ok as we don't care about what happens in the token.
+    // We assume that the erc20 is view since what happens in the token is not relevant.
     function _.transfer(address, uint256) external => NONDET;
     function _.transferFrom(address, address, uint256) external => NONDET;
     function _.balanceOf(address) external => NONDET;
 
-    // We assume that the IRM and oracle are view.
+    // The IRM and oracle are view.
     function _.borrowRate(MorphoHarness.MarketParams, MorphoHarness.Market) external => NONDET;
     function _.price() external => NONDET;
 
-    // We deactivate callbacks.
-    // Ideally we can assume that they can't change arbitrarily the storage of Morpho
-    // and Metamorpho, but can only reenter through public entry-points, but I don't
-    // know how to do this.
+    // We assume that there are no callbacks.
     function _.onMorphoSupply(uint256, bytes) external => NONDET;
     function _.onMorphoRepay(uint256, bytes) external => NONDET;
     function _.onMorphoSupplyCollateral(uint256, bytes) external => NONDET;

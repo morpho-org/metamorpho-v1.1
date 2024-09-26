@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
-pragma solidity 0.8.21;
+pragma solidity 0.8.26;
 
 import {
     Math, MetaMorpho, Id, ConstantsLib, PendingUint192, PendingAddress, MarketConfig
@@ -32,7 +32,7 @@ contract MetaMorphoHarness is MetaMorpho {
     }
 
     function minTimelock() external pure returns (uint256) {
-        return ConstantsLib.MIN_TIMELOCK;
+        return ConstantsLib.POST_INITIALIZATION_MIN_TIMELOCK;
     }
 
     function maxTimelock() external pure returns (uint256) {

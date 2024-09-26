@@ -12,8 +12,7 @@ methods {
     function maxFee() external returns(uint256) envfree;
     function DECIMALS_OFFSET() external returns(uint8) envfree;
 
-    // We assume that Morpho and the ERC20s can't touch back Metamorpho.
-    // TODO: improve this, and assume that there can be reentrancies through public entry-points.
+    // We assume that Morpho and the ERC20s can't reenter Metamorpho.
     function _.supply(MetaMorphoHarness.MarketParams, uint256, uint256, address, bytes) external => NONDET;
     function _.withdraw(MetaMorphoHarness.MarketParams, uint256, uint256, address, address) external => NONDET;
     function _.accrueInterest(MetaMorphoHarness.MarketParams) external => NONDET;
@@ -21,7 +20,7 @@ methods {
     function _.supplyShares(MetaMorphoHarness.Id, address) external => NONDET;
     function _.expectedSupplyAssets(MetaMorphoHarness.MarketParams, address) external => CONSTANT;
     function _.market(MetaMorphoHarness.Id) external => NONDET;
-    
+
     function _.transfer(address, uint256) external => NONDET;
     function _.transferFrom(address, address, uint256) external => NONDET;
     function _.balanceOf(address) external => NONDET;
@@ -40,6 +39,7 @@ function summaryMulDiv(uint256 x, uint256 y, uint256 d, Math.Rounding rounding) 
     }
 }
 
+// Check that the lost assets always increase.
 rule lostAssetsIncreases(method f, env e, calldataarg args) {
     uint256 lostAssetsBefore = lostAssets();
 
@@ -50,14 +50,16 @@ rule lostAssetsIncreases(method f, env e, calldataarg args) {
     assert lostAssetsBefore <= lostAssetsAfter;
 }
 
+// Check that the last total assets are smaller than the total assets.
 rule lastTotalAssetsSmallerThanTotalAssets() {
     assert lastTotalAssets() <= totalAssets();
 }
 
-rule lastTotalAssetsIncreases(method f, env e, calldataarg args) 
+// Check that the last total assets increase except on withdrawal and redeem.
+rule lastTotalAssetsIncreases(method f, env e, calldataarg args)
 filtered {
-    f -> f.selector != sig:withdraw(uint256, address, address).selector && 
-        f.selector != sig:redeem(uint256, address, address).selector && 
+    f -> f.selector != sig:withdraw(uint256, address, address).selector &&
+        f.selector != sig:redeem(uint256, address, address).selector &&
         f.selector != sig:updateWithdrawQueue(uint256[]).selector
 }
 {
@@ -70,7 +72,7 @@ filtered {
     assert lastTotalAssetsBefore <= lastTotalAssetsAfter;
 }
 
-// this rule's vacuity check is timing out
+// Check that the last total assets decreases on withdraw.
 rule lastTotalAssetsDecreasesCorrectlyOnWithdraw(env e, uint256 assets, address receiver, address owner) {
     uint256 lastTotalAssetsBefore = lastTotalAssets();
 
@@ -81,7 +83,7 @@ rule lastTotalAssetsDecreasesCorrectlyOnWithdraw(env e, uint256 assets, address 
     assert to_mathint(lastTotalAssetsAfter) >= lastTotalAssetsBefore - assets;
 }
 
-// this rule's vacuity check is timing out
+// Check that the last total assets decreases on redeem.
 rule lastTotalAssetsDecreasesCorrectlyOnRedeem(env e, uint256 shares, address receiver, address owner) {
     uint256 lastTotalAssetsBefore = lastTotalAssets();
 
@@ -92,7 +94,7 @@ rule lastTotalAssetsDecreasesCorrectlyOnRedeem(env e, uint256 shares, address re
     assert to_mathint(lastTotalAssetsAfter) >= lastTotalAssetsBefore - assets;
 }
 
-ghost mathint sumBalances {
+persistent ghost mathint sumBalances {
     init_state axiom sumBalances == 0;
 }
 
@@ -104,11 +106,11 @@ hook Sstore _balances[KEY address user] uint256 newBalance (uint256 oldBalance) 
     sumBalances = sumBalances + newBalance - oldBalance;
 }
 
+// Check that the total supply is the sum of the balances.
 strong invariant totalIsSumBalances()
     to_mathint(totalSupply()) == sumBalances;
 
-// More precisely: share price does not decrease lower than the one at the last interaction.
-// TODO: not passing, but I don't understand how
+// Check that the share price does not decrease lower than the one at the last interaction.
 rule sharePriceIncreases(method f, env e, calldataarg args) {
     requireInvariant totalIsSumBalances();
     require assert_uint256(fee()) == 0;

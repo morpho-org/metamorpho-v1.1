@@ -28,7 +28,9 @@ Those rewards can be transferred to the `skimRecipient`.
 The vault's owner has the choice to distribute back these rewards to vault depositors however they want.
 For more information about this use case, see the [Rewards](#rewards) section.
 
-All actions that may be against users' interests (e.g. enabling a market with a high exposure) are subject to a timelock of minimum 24 hours.
+All actions that may be against users' interests (e.g. enabling a market with a high exposure) is subject to a timelock.
+To make vault setup easier, the initial timelock can be either 0 or anywhere between 24 hours and 2 weeks.
+Any further timelock change must set the value between 24 hours and 2 weeks.
 The `owner`, or the `guardian` if set, can revoke the action during the timelock.
 After the timelock, the action can be executed by anyone.
 
@@ -51,6 +53,7 @@ It can:
 - [Timelocked if already set] Set the guardian.
 - Set the performance fee (capped at 50%).
 - Set the fee recipient.
+- Set the name and symbol of the vault.
 
 #### Curator
 

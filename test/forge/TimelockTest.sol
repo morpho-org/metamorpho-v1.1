@@ -34,7 +34,7 @@ contract TimelockTest is IntegrationTest {
     }
 
     function testSubmitTimelockDecreased(uint256 timelock) public {
-        timelock = bound(timelock, ConstantsLib.MIN_TIMELOCK, TIMELOCK - 1);
+        timelock = _boundTimelock(timelock);
 
         vm.expectEmit();
         emit EventsLib.SubmitTimelock(timelock);
@@ -50,7 +50,7 @@ contract TimelockTest is IntegrationTest {
     }
 
     function testSubmitTimelockAlreadyPending(uint256 timelock) public {
-        timelock = bound(timelock, ConstantsLib.MIN_TIMELOCK, TIMELOCK - 1);
+        timelock = _boundTimelock(timelock);
 
         vm.prank(OWNER);
         vault.submitTimelock(timelock);
@@ -72,26 +72,11 @@ contract TimelockTest is IntegrationTest {
         createMetaMorpho(OWNER, address(morpho), timelock, address(loanToken), "MetaMorpho Vault", "MMV");
     }
 
-    function testDeployMetaMorphoBelowMinTimelock(uint256 timelock) public {
-        timelock = bound(timelock, 0, ConstantsLib.MIN_TIMELOCK - 1);
-
-        vm.expectRevert(ErrorsLib.BelowMinTimelock.selector);
-        createMetaMorpho(OWNER, address(morpho), timelock, address(loanToken), "MetaMorpho Vault", "MMV");
-    }
-
     function testSubmitTimelockAboveMaxTimelock(uint256 timelock) public {
         timelock = bound(timelock, ConstantsLib.MAX_TIMELOCK + 1, type(uint256).max);
 
         vm.prank(OWNER);
         vm.expectRevert(ErrorsLib.AboveMaxTimelock.selector);
-        vault.submitTimelock(timelock);
-    }
-
-    function testSubmitTimelockBelowMinTimelock(uint256 timelock) public {
-        timelock = bound(timelock, 0, ConstantsLib.MIN_TIMELOCK - 1);
-
-        vm.prank(OWNER);
-        vm.expectRevert(ErrorsLib.BelowMinTimelock.selector);
         vault.submitTimelock(timelock);
     }
 
@@ -103,8 +88,16 @@ contract TimelockTest is IntegrationTest {
         vault.submitTimelock(timelock);
     }
 
+    function testSubmitTimelockBelowMinTimelock(uint256 timelock) public {
+        timelock = bound(timelock, 0, ConstantsLib.POST_INITIALIZATION_MIN_TIMELOCK - 1);
+
+        vm.prank(OWNER);
+        vm.expectRevert(ErrorsLib.BelowMinTimelock.selector);
+        vault.submitTimelock(timelock);
+    }
+
     function testAcceptTimelock(uint256 timelock) public {
-        timelock = bound(timelock, ConstantsLib.MIN_TIMELOCK, TIMELOCK - 1);
+        timelock = _boundTimelock(timelock);
 
         vm.prank(OWNER);
         vault.submitTimelock(timelock);
@@ -129,7 +122,7 @@ contract TimelockTest is IntegrationTest {
     }
 
     function testAcceptTimelockTimelockNotElapsed(uint256 timelock, uint256 elapsed) public {
-        timelock = bound(timelock, ConstantsLib.MIN_TIMELOCK, TIMELOCK - 1);
+        timelock = _boundTimelock(timelock);
         elapsed = bound(elapsed, 1, TIMELOCK - 1);
 
         vm.prank(OWNER);
@@ -242,7 +235,7 @@ contract TimelockTest is IntegrationTest {
     }
 
     function testAcceptGuardianTimelockDecreased(uint256 timelock, uint256 elapsed) public {
-        timelock = bound(timelock, ConstantsLib.MIN_TIMELOCK, TIMELOCK - 1);
+        timelock = _boundTimelock(timelock);
         elapsed = bound(elapsed, 1, TIMELOCK - 1);
 
         vm.prank(OWNER);
@@ -399,7 +392,7 @@ contract TimelockTest is IntegrationTest {
 
     function testAcceptCapIncreasedTimelockDecreased(uint256 cap, uint256 timelock, uint256 elapsed) public {
         cap = bound(cap, CAP + 1, type(uint184).max);
-        timelock = bound(timelock, ConstantsLib.MIN_TIMELOCK, TIMELOCK - 1);
+        timelock = _boundTimelock(timelock);
         elapsed = bound(elapsed, 1, TIMELOCK - 1);
 
         vm.prank(OWNER);

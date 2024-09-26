@@ -7,6 +7,9 @@ contract LostAssetsTest is IntegrationTest {
     using stdStorage for StdStorage;
     using MorphoBalancesLib for IMorpho;
     using MarketParamsLib for MarketParams;
+    using MathLib for uint256;
+
+    address internal LIQUIDATOR;
 
     function _writeTotalSupplyAssets(bytes32 id, uint128 newValue) internal {
         uint256 marketSlot = 3;
@@ -21,6 +24,8 @@ contract LostAssetsTest is IntegrationTest {
 
         _setCap(allMarkets[0], CAP);
         _sortSupplyQueueIdleLast();
+
+        LIQUIDATOR = makeAddr("Liquidator");
     }
 
     function testWriteTotalSupplyAssets(bytes32 id, uint128 newValue) public {
@@ -249,5 +254,129 @@ contract LostAssetsTest is IntegrationTest {
 
         assertEq(totalAssetsBefore, totalAssetsAfter);
         assertEq(vault.lostAssets(), assets0);
+    }
+
+    function testLostAssetsAfterBadDebt(uint256 borrowed, uint256 collateral, uint256 deposit) public {
+        borrowed = bound(borrowed, MIN_TEST_ASSETS, MAX_TEST_ASSETS);
+        collateral = bound(collateral, borrowed.mulDivUp(1e18, allMarkets[0].lltv), type(uint128).max);
+        deposit = bound(deposit, borrowed, MAX_TEST_ASSETS);
+
+        collateralToken.setBalance(BORROWER, collateral);
+        loanToken.setBalance(LIQUIDATOR, borrowed);
+        loanToken.setBalance(SUPPLIER, deposit);
+
+        vm.prank(SUPPLIER);
+        vault.deposit(deposit, ONBEHALF);
+
+        vm.startPrank(BORROWER);
+        morpho.supplyCollateral(allMarkets[0], collateral, BORROWER, hex"");
+        morpho.borrow(allMarkets[0], borrowed, 0, BORROWER, BORROWER);
+        vm.stopPrank();
+
+        oracle.setPrice(0);
+
+        vm.prank(LIQUIDATOR);
+
+        morpho.liquidate(allMarkets[0], BORROWER, collateral, 0, hex"");
+
+        uint256 totalAssetsBefore = vault.totalAssets();
+
+        assertEq(vault.lostAssets(), 0);
+
+        vault.deposit(0, ONBEHALF); // update lostAssets.
+
+        assertEq(vault.lostAssets(), borrowed);
+        assertEq(totalAssetsBefore, vault.totalAssets());
+    }
+
+    function testCoverLostAssets(uint256 assets, uint128 expectedLostAssets) public {
+        assets = bound(assets, MIN_TEST_ASSETS, MAX_TEST_ASSETS);
+
+        loanToken.setBalance(SUPPLIER, assets);
+
+        vm.prank(SUPPLIER);
+        vault.deposit(assets, ONBEHALF);
+
+        uint128 totalSupplyAssetsBefore = morpho.market(allMarkets[0].id()).totalSupplyAssets;
+        expectedLostAssets = uint128(bound(expectedLostAssets, 0, totalSupplyAssetsBefore));
+
+        _writeTotalSupplyAssets(Id.unwrap(allMarkets[0].id()), totalSupplyAssetsBefore - expectedLostAssets);
+
+        loanToken.setBalance(address(this), expectedLostAssets);
+        loanToken.approve(address(vault), expectedLostAssets);
+        vault.deposit(expectedLostAssets, address(1));
+
+        vm.prank(ONBEHALF);
+        vault.withdraw(assets, ONBEHALF, ONBEHALF);
+    }
+
+    function testSupplyCanCreateLostAssets() public {
+        _setCap(allMarkets[0], type(uint128).max);
+        Id[] memory supplyQueue = new Id[](1);
+        supplyQueue[0] = allMarkets[0].id();
+        vm.prank(CURATOR);
+        vault.setSupplyQueue(supplyQueue);
+
+        uint256 assets0 = 1 ether;
+
+        loanToken.setBalance(SUPPLIER, assets0);
+        collateralToken.setBalance(BORROWER, type(uint128).max);
+
+        vm.prank(SUPPLIER);
+        morpho.supply(allMarkets[0], assets0, 0, SUPPLIER, hex"");
+
+        vm.startPrank(BORROWER);
+        morpho.supplyCollateral(allMarkets[0], type(uint128).max, BORROWER, hex"");
+        morpho.borrow(allMarkets[0], assets0, 0, BORROWER, BORROWER);
+        vm.stopPrank();
+
+        // WARP
+        irm.setApr(1e18);
+        vm.warp(block.timestamp + 1000);
+        morpho.accrueInterest(allMarkets[0]);
+
+        loanToken.setBalance(address(this), 2);
+        vault.deposit(2, address(this));
+
+        vault.deposit(0, address(this));
+
+        assertEq(vault.lostAssets(), 1);
+    }
+
+    function testWithdrawCanCreateLostAssets() public {
+        // Values found by fuzzing.
+        uint256 assets = 68398999741522940;
+        uint128 newTotalSupplyAssets = 615590997673706468;
+
+        _setCap(allMarkets[0], type(uint128).max);
+        Id[] memory supplyQueue = new Id[](1);
+        supplyQueue[0] = allMarkets[0].id();
+        vm.prank(CURATOR);
+        vault.setSupplyQueue(supplyQueue);
+
+        loanToken.setBalance(address(this), assets);
+        vault.deposit(assets, address(this));
+
+        collateralToken.setBalance(BORROWER, type(uint128).max);
+        vm.startPrank(BORROWER);
+        morpho.supplyCollateral(allMarkets[0], type(uint128).max, BORROWER, hex"");
+        morpho.borrow(allMarkets[0], assets, 0, BORROWER, BORROWER);
+        vm.stopPrank();
+
+        // WARP
+        _writeTotalSupplyAssets(Id.unwrap(allMarkets[0].id()), newTotalSupplyAssets);
+
+        loanToken.setBalance(BORROWER, type(uint256).max);
+        vm.startPrank(BORROWER);
+        loanToken.approve(address(morpho), type(uint256).max);
+        morpho.repay(allMarkets[0], 0, morpho.position(allMarkets[0].id(), BORROWER).borrowShares, BORROWER, hex"");
+        vm.stopPrank();
+
+        vault.withdraw(vault.maxWithdraw(address(this)) - 1, address(this), address(this));
+
+        // Call to update lostAssets.
+        vault.deposit(0, address(this));
+
+        assertEq(vault.lostAssets(), 1);
     }
 }
