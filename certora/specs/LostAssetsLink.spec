@@ -63,15 +63,10 @@ methods {
     function Util.libId(MetaMorphoHarness.MarketParams) external returns(MetaMorphoHarness.Id) envfree;
 }
 
+ghost ghostExpectedSupply(address, address, address, address, uint256, address) returns uint256;
+
 function summaryExpectedSupplyAssets(MorphoHarness.MarketParams marketParams, address user) returns uint256 {
-    MorphoHarness.Id id = Util.libId(marketParams);
-
-    uint256 userShares = Morpho.supplyShares(id, user);
-    uint256 totalSupplyAssets = Morpho.virtualTotalSupplyAssets(id);
-    uint256 totalSupplyShares = Morpho.virtualTotalSupplyShares(id);
-
-    // Safe require because the reference implementation would revert.
-    return require_uint256(userShares * totalSupplyAssets / totalSupplyShares);
+    return ghostExpectedSupply(marketParams.loanToken, marketParams.collateralToken, marketParams.oracle, marketParams.irm, marketParams.lltv, user);
 }
 
 // Metamorpho's mulDiv (from OZ).
