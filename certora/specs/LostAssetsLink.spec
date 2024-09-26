@@ -14,22 +14,7 @@ methods {
     function newLostAssets() external returns(uint256) envfree;
     function MORPHO() external returns(address) envfree;
 
-<<<<<<< HEAD
     // Summaries.
-||||||| 7c54e1f
-    function MetaMorpho._convertToAssets(uint256,Math.Rounding) internal returns (uint256) => NONDET /* difficulty 127 */;
-    function MetaMorpho._convertToShares(uint256,Math.Rounding) internal returns (uint256) => NONDET /* difficulty 127 */;
-    function MetaMorpho._convertToAssetsWithTotals(uint256, uint256, uint256, Math.Rounding) internal returns (uint256) => NONDET;
-    function MetaMorpho._convertToSharesWithTotals(uint256, uint256, uint256, Math.Rounding) internal returns (uint256) => NONDET;
-
-    // Summaries.
-=======
-    function MetaMorpho._convertToAssets(uint256,Math.Rounding) internal returns (uint256) => NONDET /* difficulty 127 */;
-    function MetaMorpho._convertToShares(uint256,Math.Rounding) internal returns (uint256) => NONDET /* difficulty 127 */;
-    function MetaMorpho._convertToAssetsWithTotals(uint256, uint256, uint256, Math.Rounding) internal returns (uint256) => NONDET;
-    function MetaMorpho._convertToSharesWithTotals(uint256, uint256, uint256, Math.Rounding) internal returns (uint256) => NONDET;
-
->>>>>>> main
     function _.expectedSupplyAssets(MorphoHarness.MarketParams marketParams, address user) external => summaryExpectedSupplyAssets(marketParams, user) expect (uint256);
     function _.idToMarketParams(MetaMorphoHarness.Id id) external => summaryIdToMarketParams(id) expect MetaMorphoHarness.MarketParams ALL;
 
