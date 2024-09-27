@@ -14,14 +14,9 @@ methods {
     function newLostAssets() external returns(uint256) envfree;
     function MORPHO() external returns(address) envfree;
 
-    function MetaMorpho._convertToAssets(uint256,Math.Rounding) internal returns (uint256) => NONDET /* difficulty 127 */;
-    function MetaMorpho._convertToShares(uint256,Math.Rounding) internal returns (uint256) => NONDET /* difficulty 127 */;
-    function MetaMorpho._convertToAssetsWithTotals(uint256, uint256, uint256, Math.Rounding) internal returns (uint256) => NONDET;
-    function MetaMorpho._convertToSharesWithTotals(uint256, uint256, uint256, Math.Rounding) internal returns (uint256) => NONDET;
-
+    // Summaries.
     function _.expectedSupplyAssets(MorphoHarness.MarketParams marketParams, address user) external => summaryExpectedSupplyAssets(marketParams, user) expect (uint256);
     function _.idToMarketParams(MetaMorphoHarness.Id id) external => summaryIdToMarketParams(id) expect MetaMorphoHarness.MarketParams ALL;
-    function _.mulDiv(uint256 x, uint256 y, uint256 denominator, Math.Rounding rounding) internal => summaryMulDiv(x, y, denominator, rounding) expect (uint256);
 
     // We assume that the erc20 is view since what happens in the token is not relevant.
     function _.transfer(address, uint256) external => NONDET;
@@ -42,48 +37,14 @@ methods {
     function Morpho.supplyShares(MorphoHarness.Id, address) external returns uint256 envfree;
     function Morpho.virtualTotalSupplyAssets(MorphoHarness.Id) external returns uint256 envfree;
     function Morpho.virtualTotalSupplyShares(MorphoHarness.Id) external returns uint256 envfree;
-    function MathLib.mulDivDown(uint256 a, uint256 b, uint256 c) internal returns uint256 => summaryMulDivDown(a,b,c);
-    function MathLib.mulDivUp(uint256 a, uint256 b, uint256 c) internal returns uint256 => summaryMulDivUp(a,b,c);
 
     function Util.libId(MetaMorphoHarness.MarketParams) external returns(MetaMorphoHarness.Id) envfree;
 }
 
+ghost ghostExpectedSupply(address, address, address, address, uint256, address) returns uint256;
+
 function summaryExpectedSupplyAssets(MorphoHarness.MarketParams marketParams, address user) returns uint256 {
-    MorphoHarness.Id id = Util.libId(marketParams);
-
-    uint256 userShares = Morpho.supplyShares(id, user);
-    uint256 totalSupplyAssets = Morpho.virtualTotalSupplyAssets(id);
-    uint256 totalSupplyShares = Morpho.virtualTotalSupplyShares(id);
-
-    // Safe require because the reference implementation would revert.
-    return require_uint256(userShares * totalSupplyAssets / totalSupplyShares);
-}
-
-// Metamorpho's mulDiv (from OZ).
-function summaryMulDiv(uint256 x, uint256 y, uint256 d, Math.Rounding rounding) returns uint256 {
-    require d != 0;
-
-    if (rounding == Math.Rounding.Floor) {
-        // Safe require because the reference implementation would revert.
-        return require_uint256((x * y) / d);
-    } else {
-        // Safe require because the reference implementation would revert.
-        return require_uint256((x * y + (d - 1)) / d);
-    }
-}
-
-// Morpho's mulDivUp.
-function summaryMulDivUp(uint256 x, uint256 y, uint256 d) returns uint256 {
-    require d != 0;
-    // Safe require because the reference implementation would revert.
-    return require_uint256((x * y + (d - 1)) / d);
-}
-
-// Morpho's mulDivDown.
-function summaryMulDivDown(uint256 x, uint256 y, uint256 d) returns uint256 {
-    require d != 0;
-    // Safe require because the reference implementation would revert.
-    return require_uint256((x * y) / d);
+    return ghostExpectedSupply(marketParams.loanToken, marketParams.collateralToken, marketParams.oracle, marketParams.irm, marketParams.lltv, user);
 }
 
 function summaryIdToMarketParams(MetaMorphoHarness.Id id) returns MetaMorphoHarness.MarketParams {
@@ -97,30 +58,7 @@ function summaryIdToMarketParams(MetaMorphoHarness.Id id) returns MetaMorphoHarn
     return marketParams;
 }
 
-// Deactivated because they are timing out
-
-// // Note that it implies newLostAssets <= totalAssets.
-// // Note that it implies realTotalAssets + lostAssets = lastTotalAssets after accrueInterest().
-// invariant realPlusLostEqualsTotal()
-//     realTotalAssets() + newLostAssets() == to_mathint(totalAssets());
-
-
-// // LostAssets can only change after some bad debt has been realised or a market has been forced removed.
-// rule lostAssetsOnlyMovesAfterUpdateWQueueAndLiquidate(env e0, method f, env e, calldataarg args)
-// filtered {
-//     f -> !f.isView &&
-//         f.selector != sig:MorphoHarness.liquidate(MorphoHarness.MarketParams, address, uint256, uint256, bytes).selector &&
-//         f.selector != sig:updateWithdrawQueue(uint256[]).selector
-// }
-// {
-//     require e.msg.sender != currentContract;
-
-//     deposit(e0, 0, 1);
-//     uint256 lostAssetsBefore = newLostAssets();
-
-//     f(e, args);
-
-//     uint256 lostAssetsAfter = newLostAssets();
-
-//     assert lostAssetsBefore == lostAssetsAfter;
-// }
+// Note that it implies newLostAssets <= totalAssets.
+// Note that it implies realTotalAssets + lostAssets = lastTotalAssets after accrueInterest().
+invariant realPlusLostEqualsTotal()
+    realTotalAssets() + newLostAssets() == to_mathint(totalAssets());
