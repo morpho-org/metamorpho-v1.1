@@ -60,5 +60,6 @@ function summaryIdToMarketParams(MetaMorphoHarness.Id id) returns MetaMorphoHarn
 
 // Note that it implies newLostAssets <= totalAssets.
 // Note that it implies realTotalAssets + lostAssets = lastTotalAssets after accrueInterest().
-invariant realPlusLostEqualsTotal()
-    realTotalAssets() + newLostAssets() == to_mathint(totalAssets());
+rule realPlusLostEqualsTotal() {
+    assert realTotalAssets() + newLostAssets() == totalAssets();
+}
