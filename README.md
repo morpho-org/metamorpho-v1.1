@@ -1,4 +1,10 @@
-# MetaMorpho
+# MetaMorpho No Bad Debt Realization
+
+> [!NOTE]  
+> This repo is a fork of [metamorpho](https://github.com/morpho-org/metamorpho), with 3 changes:
+> - this MetaMorpho vault does not realize the bad debt (more on this [here](https://github.com/morpho-org/metamorpho-no-bad-debt-realization/blob/d16ecfed0da4b4c51ed65c2eba865f5623c2242b/src/interfaces/IMetaMorpho.sol#L81));
+> - the timelock can be set to zero at deployment;
+> - the name and symbol are mutable.
 
 ## Overview
 
