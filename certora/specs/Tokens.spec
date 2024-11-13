@@ -55,6 +55,7 @@ function summaryWithdraw(MetaMorphoHarness.MarketParams marketParams, uint256 as
     if (shares == 0) {
         require withdrawn == assets;
     } else {
+        // The following withdrawn computation mimicks `toAssetsDown` which takes into account virtual shares and assets.
         uint256 totalAssets = Morpho.virtualTotalSupplyAssets(id);
         uint256 totalShares = Morpho.virtualTotalSupplyShares(id);
         require withdrawn == Util.libMulDivDown(shares, totalAssets, totalShares);
