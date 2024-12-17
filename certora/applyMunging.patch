@@ -1,18 +1,14 @@
 diff -ruN interfaces/IMetaMorpho.sol interfaces/IMetaMorpho.sol
---- interfaces/IMetaMorpho.sol	2024-08-19 12:35:33.153217935 +0200
-+++ interfaces/IMetaMorpho.sol	2024-09-04 10:44:42.493695519 +0200
-@@ -1,9 +1,9 @@
+--- interfaces/IMetaMorpho.sol
++++ interfaces/IMetaMorpho.sol
+@@ -1,7 +1,7 @@
  // SPDX-License-Identifier: GPL-2.0-or-later
  pragma solidity >=0.5.0;
  
 -import {IMorpho, Id, MarketParams} from "../../lib/morpho-blue/src/interfaces/IMorpho.sol";
--import {IERC4626} from "../../lib/openzeppelin-contracts/contracts/interfaces/IERC4626.sol";
--import {IERC20Permit} from "../../lib/openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Permit.sol";
-+import {IMorphoHarness, Id, MarketParams} from "../../helpers/IMorphoHarness.sol";
-+import {IERC4626} from "../../../lib/openzeppelin-contracts/contracts/interfaces/IERC4626.sol";
-+import {IERC20Permit} from "../../../lib/openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Permit.sol";
- 
- import {MarketConfig, PendingUint192, PendingAddress} from "../libraries/PendingLib.sol";
++import {IMorphoHarness, Id, MarketParams} from "../../certora/helpers/IMorphoHarness.sol";
+ import {IERC4626} from "../../lib/openzeppelin-contracts/contracts/interfaces/IERC4626.sol";
+ import {IERC20Permit} from "../../lib/openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Permit.sol";
  
 @@ -30,7 +30,7 @@
  /// @dev Consider using the IMetaMorpho interface instead of this one.
@@ -23,78 +19,29 @@ diff -ruN interfaces/IMetaMorpho.sol interfaces/IMetaMorpho.sol
      function DECIMALS_OFFSET() external view returns (uint8);
  
      /// @notice The address of the curator.
-diff -ruN libraries/ErrorsLib.sol libraries/ErrorsLib.sol
---- libraries/ErrorsLib.sol	2024-08-19 13:28:08.003401745 +0200
-+++ libraries/ErrorsLib.sol	2024-09-04 10:44:42.493695519 +0200
-@@ -1,7 +1,7 @@
- // SPDX-License-Identifier: GPL-2.0-or-later
- pragma solidity ^0.8.0;
- 
--import {Id} from "../../lib/morpho-blue/src/interfaces/IMorpho.sol";
-+import {Id} from "../../../lib/morpho-blue/src/interfaces/IMorpho.sol";
- 
- /// @title ErrorsLib
- /// @author Morpho Labs
-diff -ruN libraries/EventsLib.sol libraries/EventsLib.sol
---- libraries/EventsLib.sol	2024-08-16 18:17:20.260781030 +0200
-+++ libraries/EventsLib.sol	2024-09-04 10:44:42.493695519 +0200
-@@ -1,7 +1,7 @@
- // SPDX-License-Identifier: GPL-2.0-or-later
- pragma solidity ^0.8.0;
- 
--import {Id} from "../../lib/morpho-blue/src/interfaces/IMorpho.sol";
-+import {Id} from "../../../lib/morpho-blue/src/interfaces/IMorpho.sol";
- 
- import {PendingAddress} from "./PendingLib.sol";
- 
 diff -ruN MetaMorpho.sol MetaMorpho.sol
---- MetaMorpho.sol	2024-09-04 10:44:33.985829466 +0200
-+++ MetaMorpho.sol	2024-09-04 10:44:42.497695457 +0200
-@@ -9,24 +9,22 @@
+--- MetaMorpho.sol
++++ MetaMorpho.sol
+@@ -9,7 +9,7 @@
      IMetaMorphoBase,
      IMetaMorphoStaticTyping
  } from "./interfaces/IMetaMorpho.sol";
 -import {Id, MarketParams, Market, IMorpho} from "../lib/morpho-blue/src/interfaces/IMorpho.sol";
-+import {Id, MarketParams, Market, IMorphoHarness} from "../helpers/IMorphoHarness.sol";
++import {Id, MarketParams, Market, IMorphoHarness} from "../certora/helpers/IMorphoHarness.sol";
  
  import {PendingUint192, PendingAddress, PendingLib} from "./libraries/PendingLib.sol";
  import {ConstantsLib} from "./libraries/ConstantsLib.sol";
- import {ErrorsLib} from "./libraries/ErrorsLib.sol";
- import {EventsLib} from "./libraries/EventsLib.sol";
--import {WAD} from "../lib/morpho-blue/src/libraries/MathLib.sol";
--import {UtilsLib} from "../lib/morpho-blue/src/libraries/UtilsLib.sol";
--import {SafeCast} from "../lib/openzeppelin-contracts/contracts/utils/math/SafeCast.sol";
--import {SharesMathLib} from "../lib/morpho-blue/src/libraries/SharesMathLib.sol";
+@@ -19,10 +19,8 @@
+ import {UtilsLib} from "../lib/morpho-blue/src/libraries/UtilsLib.sol";
+ import {SafeCast} from "../lib/openzeppelin-contracts/contracts/utils/math/SafeCast.sol";
+ import {SharesMathLib} from "../lib/morpho-blue/src/libraries/SharesMathLib.sol";
 -import {MorphoLib} from "../lib/morpho-blue/src/libraries/periphery/MorphoLib.sol";
--import {MarketParamsLib} from "../lib/morpho-blue/src/libraries/MarketParamsLib.sol";
--import {IERC20Metadata} from "../lib/openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Metadata.sol";
+ import {MarketParamsLib} from "../lib/morpho-blue/src/libraries/MarketParamsLib.sol";
+ import {IERC20Metadata} from "../lib/openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 -import {MorphoBalancesLib} from "../lib/morpho-blue/src/libraries/periphery/MorphoBalancesLib.sol";
--
--import {Multicall} from "../lib/openzeppelin-contracts/contracts/utils/Multicall.sol";
--import {Ownable2Step, Ownable} from "../lib/openzeppelin-contracts/contracts/access/Ownable2Step.sol";
--import {ERC20Permit} from "../lib/openzeppelin-contracts/contracts/token/ERC20/extensions/ERC20Permit.sol";
-+import {WAD} from "../../lib/morpho-blue/src/libraries/MathLib.sol";
-+import {UtilsLib} from "../../lib/morpho-blue/src/libraries/UtilsLib.sol";
-+import {SafeCast} from "../../lib/openzeppelin-contracts/contracts/utils/math/SafeCast.sol";
-+import {SharesMathLib} from "../../lib/morpho-blue/src/libraries/SharesMathLib.sol";
-+import {MarketParamsLib} from "../../lib/morpho-blue/src/libraries/MarketParamsLib.sol";
-+import {IERC20Metadata} from "../../lib/openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Metadata.sol";
-+
-+import {Multicall} from "../../lib/openzeppelin-contracts/contracts/utils/Multicall.sol";
-+import {Ownable2Step, Ownable} from "../../lib/openzeppelin-contracts/contracts/access/Ownable2Step.sol";
-+import {ERC20Permit} from "../../lib/openzeppelin-contracts/contracts/token/ERC20/extensions/ERC20Permit.sol";
- import {
-     IERC20,
-     IERC4626,
-@@ -34,7 +32,7 @@
-     ERC4626,
-     Math,
-     SafeERC20
--} from "../lib/openzeppelin-contracts/contracts/token/ERC20/extensions/ERC4626.sol";
-+} from "../../lib/openzeppelin-contracts/contracts/token/ERC20/extensions/ERC4626.sol";
  
- /// @title MetaMorpho
- /// @author Morpho Labs
+ import {Multicall} from "../lib/openzeppelin-contracts/contracts/utils/Multicall.sol";
+ import {Ownable2Step, Ownable} from "../lib/openzeppelin-contracts/contracts/access/Ownable2Step.sol";
 @@ -45,9 +43,7 @@
      using UtilsLib for uint256;
      using SafeCast for uint256;
@@ -134,7 +81,7 @@ diff -ruN MetaMorpho.sol MetaMorpho.sol
      /* CONSTRUCTOR */
  
      /// @dev Initializes the contract.
-@@ -144,7 +153,7 @@
+@@ -145,7 +154,7 @@
          _symbol = __symbol;
          emit EventsLib.SetSymbol(__symbol);
  
@@ -143,7 +90,7 @@ diff -ruN MetaMorpho.sol MetaMorpho.sol
          DECIMALS_OFFSET = uint8(uint256(18).zeroFloorSub(IERC20Metadata(_asset).decimals()));
  
          IERC20(_asset).forceApprove(morpho, type(uint256).max);
-@@ -365,6 +374,9 @@
+@@ -366,6 +375,9 @@
              seen[prevIndex] = true;
  
              newWithdrawQueue[i] = id;
@@ -153,7 +100,7 @@ diff -ruN MetaMorpho.sol MetaMorpho.sol
          }
  
          for (uint256 i; i < currLength; ++i) {
-@@ -382,6 +394,10 @@
+@@ -383,6 +395,10 @@
                      }
                  }
  
@@ -164,7 +111,7 @@ diff -ruN MetaMorpho.sol MetaMorpho.sol
                  delete config[id];
              }
          }
-@@ -770,6 +786,9 @@
+@@ -772,6 +788,9 @@
  
          if (supplyCap > 0) {
              if (!marketConfig.enabled) {
@@ -174,7 +121,7 @@ diff -ruN MetaMorpho.sol MetaMorpho.sol
                  withdrawQueue.push(id);
  
                  if (withdrawQueue.length > ConstantsLib.MAX_QUEUE_LENGTH) revert ErrorsLib.MaxQueueLengthExceeded();
-@@ -829,6 +848,9 @@
+@@ -831,6 +850,9 @@
      /// @dev Withdraws `assets` from Morpho.
      function _withdrawMorpho(uint256 assets) internal {
          for (uint256 i; i < withdrawQueue.length; ++i) {
