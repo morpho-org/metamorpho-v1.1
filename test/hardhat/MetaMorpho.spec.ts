@@ -2,8 +2,8 @@ import { AbiCoder, MaxUint256, ZeroAddress, ZeroHash, keccak256, toBigInt } from
 import hre from "hardhat";
 import _range from "lodash/range";
 import { MetaMorphoAction } from "pkg";
-import { ERC20Mock, OracleMock, MetaMorpho, IMorpho, MetaMorphoFactory, MetaMorpho__factory, IIrm } from "types";
-import { MarketParamsStruct } from "types/src/MetaMorpho";
+import { ERC20Mock, OracleMock, MetaMorphoV1_1, IMorpho, MetaMorphoV1_1Factory, MetaMorphoV1_1__factory, IIrm } from "types";
+import { MarketParamsStruct } from "types/src/MetaMorphoV1_1";
 
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 import { mine } from "@nomicfoundation/hardhat-network-helpers";
@@ -70,8 +70,8 @@ describe("MetaMorpho", () => {
   let oracle: OracleMock;
   let irm: IIrm;
 
-  let factory: MetaMorphoFactory;
-  let metaMorpho: MetaMorpho;
+  let factory: MetaMorphoV1_1Factory;
+  let metaMorpho: MetaMorphoV1_1;
   let metaMorphoAddress: string;
 
   let supplyCap: bigint;
@@ -184,9 +184,9 @@ describe("MetaMorpho", () => {
     await morpho.enableLltv(idleParams.lltv);
     await morpho.createMarket(idleParams);
 
-    const MetaMorphoFactoryFactory = await hre.ethers.getContractFactory("MetaMorphoFactory", admin);
+    const MetaMorphoV1_1FactoryFactory = await hre.ethers.getContractFactory("MetaMorphoV1_1Factory", admin);
 
-    factory = await MetaMorphoFactoryFactory.deploy(morphoAddress);
+    factory = await MetaMorphoV1_1FactoryFactory.deploy(morphoAddress);
 
     metaMorphoAddress = await factory.createMetaMorpho.staticCall(
       admin.address,
@@ -197,7 +197,7 @@ describe("MetaMorpho", () => {
       ZeroHash,
     );
 
-    metaMorpho = MetaMorpho__factory.connect(metaMorphoAddress, admin);
+    metaMorpho = MetaMorphoV1_1__factory.connect(metaMorphoAddress, admin);
 
     await factory.createMetaMorpho(admin.address, timelock, loanAddress, "MetaMorpho", "mB", ZeroHash);
 
