@@ -96,15 +96,15 @@ library EventsLib {
     /// @notice Emitted when an `amount` of `token` is transferred to the skim recipient by `caller`.
     event Skim(address indexed caller, address indexed token, uint256 amount);
 
-    /// @notice Emitted when a new MetaMorpho vault is created.
-    /// @param metaMorpho The address of the MetaMorpho vault.
+    /// @notice Emitted when a new MetaMorphoV1_1 vault is created.
+    /// @param metaMorpho The address of the MetaMorphoV1_1 vault.
     /// @param caller The caller of the function.
-    /// @param initialOwner The initial owner of the MetaMorpho vault.
-    /// @param initialTimelock The initial timelock of the MetaMorpho vault.
+    /// @param initialOwner The initial owner of the MetaMorphoV1_1 vault.
+    /// @param initialTimelock The initial timelock of the MetaMorphoV1_1 vault.
     /// @param asset The address of the underlying asset.
-    /// @param name The name of the MetaMorpho vault.
-    /// @param symbol The symbol of the MetaMorpho vault.
-    /// @param salt The salt used for the MetaMorpho vault's CREATE2 address.
+    /// @param name The name of the MetaMorphoV1_1 vault.
+    /// @param symbol The symbol of the MetaMorphoV1_1 vault.
+    /// @param salt The salt used for the MetaMorphoV1_1 vault's CREATE2 address.
     event CreateMetaMorpho(
         address indexed metaMorpho,
         address indexed caller,

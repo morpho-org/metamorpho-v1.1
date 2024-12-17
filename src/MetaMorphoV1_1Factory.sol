@@ -9,10 +9,10 @@ import {ErrorsLib} from "./libraries/ErrorsLib.sol";
 
 import {MetaMorphoV1_1} from "./MetaMorphoV1_1.sol";
 
-/// @title MetaMorphoFactory
+/// @title MetaMorphoV1_1Factory
 /// @author Morpho Labs
 /// @custom:contact security@morpho.org
-/// @notice This contract allows to create MetaMorpho vaults, and to index them easily.
+/// @notice This contract allows to create MetaMorphoV1_1 vaults, and to index them easily.
 contract MetaMorphoV1_1Factory is IMetaMorphoV1_1Factory {
     /* IMMUTABLES */
 
