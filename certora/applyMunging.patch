@@ -19,18 +19,6 @@ diff -ruN interfaces/IMetaMorpho.sol interfaces/IMetaMorpho.sol
      function DECIMALS_OFFSET() external view returns (uint8);
  
      /// @notice The address of the curator.
-diff -ruN libraries/EventsLib.sol libraries/EventsLib.sol
---- libraries/EventsLib.sol
-+++ libraries/EventsLib.sol
-@@ -1,7 +1,7 @@
- // SPDX-License-Identifier: GPL-2.0-or-later
- pragma solidity ^0.8.0;
- 
--import {Id} from "../../lib/morpho-blue/src/interfaces/IMorpho.sol";
-+import {Id} from "../../../lib/morpho-blue/src/interfaces/IMorpho.sol";
- 
- import {PendingAddress} from "./PendingLib.sol";
- 
 diff -ruN MetaMorpho.sol MetaMorpho.sol
 --- MetaMorpho.sol
 +++ MetaMorpho.sol
