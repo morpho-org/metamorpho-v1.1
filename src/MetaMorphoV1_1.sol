@@ -399,13 +399,12 @@ contract MetaMorphoV1_1 is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaM
         for (uint256 i; i < allocations.length; ++i) {
             MarketAllocation memory allocation = allocations[i];
             Id id = allocation.marketParams.id();
+            if (!config[id].enabled) revert ErrorsLib.MarketNotEnabled(id);
 
             (uint256 supplyAssets, uint256 supplyShares,) = _accruedSupplyBalance(allocation.marketParams, id);
             uint256 withdrawn = supplyAssets.zeroFloorSub(allocation.assets);
 
             if (withdrawn > 0) {
-                if (!config[id].enabled) revert ErrorsLib.MarketNotEnabled(id);
-
                 // Guarantees that unknown frontrunning donations can be withdrawn, in order to disable a market.
                 uint256 shares;
                 if (allocation.assets == 0) {
