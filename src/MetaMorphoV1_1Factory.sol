@@ -1,27 +1,27 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 pragma solidity 0.8.26;
 
-import {IMetaMorpho} from "./interfaces/IMetaMorpho.sol";
-import {IMetaMorphoFactory} from "./interfaces/IMetaMorphoFactory.sol";
+import {IMetaMorphoV1_1} from "./interfaces/IMetaMorphoV1_1.sol";
+import {IMetaMorphoV1_1Factory} from "./interfaces/IMetaMorphoV1_1Factory.sol";
 
 import {EventsLib} from "./libraries/EventsLib.sol";
 import {ErrorsLib} from "./libraries/ErrorsLib.sol";
 
-import {MetaMorpho} from "./MetaMorpho.sol";
+import {MetaMorphoV1_1} from "./MetaMorphoV1_1.sol";
 
 /// @title MetaMorphoFactory
 /// @author Morpho Labs
 /// @custom:contact security@morpho.org
 /// @notice This contract allows to create MetaMorpho vaults, and to index them easily.
-contract MetaMorphoFactory is IMetaMorphoFactory {
+contract MetaMorphoV1_1Factory is IMetaMorphoV1_1Factory {
     /* IMMUTABLES */
 
-    /// @inheritdoc IMetaMorphoFactory
+    /// @inheritdoc IMetaMorphoV1_1Factory
     address public immutable MORPHO;
 
     /* STORAGE */
 
-    /// @inheritdoc IMetaMorphoFactory
+    /// @inheritdoc IMetaMorphoV1_1Factory
     mapping(address => bool) public isMetaMorpho;
 
     /* CONSTRUCTOR */
@@ -36,7 +36,7 @@ contract MetaMorphoFactory is IMetaMorphoFactory {
 
     /* EXTERNAL */
 
-    /// @inheritdoc IMetaMorphoFactory
+    /// @inheritdoc IMetaMorphoV1_1Factory
     function createMetaMorpho(
         address initialOwner,
         uint256 initialTimelock,
@@ -44,9 +44,9 @@ contract MetaMorphoFactory is IMetaMorphoFactory {
         string memory name,
         string memory symbol,
         bytes32 salt
-    ) external returns (IMetaMorpho metaMorpho) {
+    ) external returns (IMetaMorphoV1_1 metaMorpho) {
         metaMorpho =
-            IMetaMorpho(address(new MetaMorpho{salt: salt}(initialOwner, MORPHO, initialTimelock, asset, name, symbol)));
+            IMetaMorphoV1_1(address(new MetaMorphoV1_1{salt: salt}(initialOwner, MORPHO, initialTimelock, asset, name, symbol)));
 
         isMetaMorpho[address(metaMorpho)] = true;
 

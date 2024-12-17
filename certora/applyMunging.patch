@@ -1,6 +1,6 @@
-diff -ruN interfaces/IMetaMorpho.sol interfaces/IMetaMorpho.sol
---- interfaces/IMetaMorpho.sol	2024-08-19 12:35:33.153217935 +0200
-+++ interfaces/IMetaMorpho.sol	2024-09-04 10:44:42.493695519 +0200
+diff -ruN interfaces/IMetaMorphoV1_1.sol interfaces/IMetaMorphoV1_1.sol
+--- interfaces/IMetaMorphoV1_1.sol	2024-08-19 12:35:33.153217935 +0200
++++ interfaces/IMetaMorphoV1_1.sol	2024-09-04 10:44:42.493695519 +0200
 @@ -1,9 +1,9 @@
  // SPDX-License-Identifier: GPL-2.0-or-later
  pragma solidity >=0.5.0;
@@ -15,8 +15,8 @@ diff -ruN interfaces/IMetaMorpho.sol interfaces/IMetaMorpho.sol
  import {MarketConfig, PendingUint192, PendingAddress} from "../libraries/PendingLib.sol";
  
 @@ -30,7 +30,7 @@
- /// @dev Consider using the IMetaMorpho interface instead of this one.
- interface IMetaMorphoBase {
+ /// @dev Consider using the IMetaMorphoV1_1 interface instead of this one.
+ interface IMetaMorphoV1_1Base {
      /// @notice The address of the Morpho contract.
 -    function MORPHO() external view returns (IMorpho);
 +    function MORPHO() external view returns (IMorphoHarness);
@@ -51,9 +51,9 @@ diff -ruN MetaMorpho.sol MetaMorpho.sol
 --- MetaMorpho.sol	2024-09-04 10:44:33.985829466 +0200
 +++ MetaMorpho.sol	2024-09-04 10:44:42.497695457 +0200
 @@ -9,24 +9,22 @@
-     IMetaMorphoBase,
-     IMetaMorphoStaticTyping
- } from "./interfaces/IMetaMorpho.sol";
+     IMetaMorphoV1_1Base,
+     IMetaMorphoV1_1StaticTyping
+ } from "./interfaces/IMetaMorphoV1_1.sol";
 -import {Id, MarketParams, Market, IMorpho} from "../lib/morpho-blue/src/interfaces/IMorpho.sol";
 +import {Id, MarketParams, Market, IMorphoHarness} from "../helpers/IMorphoHarness.sol";
  
@@ -108,7 +108,7 @@ diff -ruN MetaMorpho.sol MetaMorpho.sol
 @@ -56,7 +52,7 @@
      /* IMMUTABLES */
  
-     /// @inheritdoc IMetaMorphoBase
+     /// @inheritdoc IMetaMorphoV1_1Base
 -    IMorpho public immutable MORPHO;
 +    IMorphoHarness public immutable MORPHO;
  

@@ -10,7 +10,7 @@ contract IntegrationTest is BaseTest {
     using MorphoBalancesLib for IMorpho;
     using MarketParamsLib for MarketParams;
 
-    IMetaMorpho internal vault;
+    IMetaMorphoV1_1 internal vault;
 
     function setUp() public virtual override {
         super.setUp();
@@ -50,9 +50,9 @@ contract IntegrationTest is BaseTest {
         address asset,
         string memory name,
         string memory symbol
-    ) public returns (IMetaMorpho) {
+    ) public returns (IMetaMorphoV1_1) {
         return
-            IMetaMorpho(deployCode("MetaMorpho.sol", abi.encode(owner, morpho, initialTimelock, asset, name, symbol)));
+            IMetaMorphoV1_1(deployCode("MetaMorpho.sol", abi.encode(owner, morpho, initialTimelock, asset, name, symbol)));
     }
 
     function _idle() internal view returns (uint256) {

@@ -1,4 +1,4 @@
-# MetaMorpho No Bad Debt Realization
+# MetaMorpho v1.1
 
 > [!NOTE]  
 > This repo is a fork of [metamorpho](https://github.com/morpho-org/metamorpho), with 3 changes:

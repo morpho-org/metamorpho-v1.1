@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 pragma solidity >=0.5.0;
 
-import {IMetaMorpho} from "./IMetaMorpho.sol";
+import {IMetaMorphoV1_1} from "./IMetaMorphoV1_1.sol";
 
-/// @title IMetaMorphoFactory
+/// @title IMetaMorphoV1_1Factory
 /// @author Morpho Labs
 /// @custom:contact security@morpho.org
 /// @notice Interface of MetaMorpho's factory.
-interface IMetaMorphoFactory {
+interface IMetaMorphoV1_1Factory {
     /// @notice The address of the Morpho contract.
     function MORPHO() external view returns (address);
 
@@ -28,5 +28,5 @@ interface IMetaMorphoFactory {
         string memory name,
         string memory symbol,
         bytes32 salt
-    ) external returns (IMetaMorpho metaMorpho);
+    ) external returns (IMetaMorphoV1_1 metaMorpho);
 }
