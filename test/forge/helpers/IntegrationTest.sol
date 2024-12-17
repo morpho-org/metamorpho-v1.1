@@ -52,7 +52,7 @@ contract IntegrationTest is BaseTest {
         string memory symbol
     ) public returns (IMetaMorphoV1_1) {
         return IMetaMorphoV1_1(
-            deployCode("MetaMorpho.sol", abi.encode(owner, morpho, initialTimelock, asset, name, symbol))
+            deployCode("MetaMorphoV1_1.sol", abi.encode(owner, morpho, initialTimelock, asset, name, symbol))
         );
     }
 

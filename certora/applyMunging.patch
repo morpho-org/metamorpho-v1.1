@@ -47,9 +47,9 @@ diff -ruN libraries/EventsLib.sol libraries/EventsLib.sol
  
  import {PendingAddress} from "./PendingLib.sol";
  
-diff -ruN MetaMorpho.sol MetaMorpho.sol
---- MetaMorpho.sol	2024-09-04 10:44:33.985829466 +0200
-+++ MetaMorpho.sol	2024-09-04 10:44:42.497695457 +0200
+diff -ruN MetaMorphoV1_1.sol MetaMorphoV1_1.sol
+--- MetaMorphoV1_1.sol	2024-09-04 10:44:33.985829466 +0200
++++ MetaMorphoV1_1.sol	2024-09-04 10:44:42.497695457 +0200
 @@ -9,24 +9,22 @@
      IMetaMorphoV1_1Base,
      IMetaMorphoV1_1StaticTyping

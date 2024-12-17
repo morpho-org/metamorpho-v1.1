@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 pragma solidity 0.8.26;
 
-import {IERC20, SafeERC20} from "../munged/MetaMorpho.sol";
+import {IERC20, SafeERC20} from "../munged/MetaMorphoV1_1.sol";
 
 contract ERC20Helper {
     using SafeERC20 for IERC20;
