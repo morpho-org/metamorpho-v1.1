@@ -426,8 +426,6 @@ contract MetaMorpho is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaMorph
                 if (suppliedAssets == 0) continue;
 
                 uint256 supplyCap = config[id].cap;
-                if (supplyCap == 0) revert ErrorsLib.UnauthorizedMarket(id);
-
                 if (supplyAssets + suppliedAssets > supplyCap) revert ErrorsLib.SupplyCapExceeded(id);
 
                 // The market's loan asset is guaranteed to be the vault's asset because it has a non-zero supply cap.
