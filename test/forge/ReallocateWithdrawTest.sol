@@ -184,7 +184,7 @@ contract ReallocateWithdrawTest is IntegrationTest {
         allocations.push(MarketAllocation(allMarkets[2], suppliedAssets[2]));
 
         vm.prank(ALLOCATOR);
-        vm.expectRevert(abi.encodeWithSelector(ErrorsLib.UnauthorizedMarket.selector, allMarkets[1].id()));
+        vm.expectRevert(abi.encodeWithSelector(ErrorsLib.SupplyCapExceeded.selector, allMarkets[1].id()));
         vault.reallocate(allocations);
     }
 
