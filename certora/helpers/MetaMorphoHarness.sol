@@ -2,8 +2,14 @@
 pragma solidity 0.8.26;
 
 import {
-    Math, MetaMorpho, Id, ConstantsLib, PendingUint192, PendingAddress, MarketConfig
-} from "../munged/MetaMorpho.sol";
+    Math,
+    MetaMorpho,
+    Id,
+    ConstantsLib,
+    PendingUint192,
+    PendingAddress,
+    MarketConfig
+} from "../../munged/MetaMorpho.sol";
 
 contract MetaMorphoHarness is MetaMorpho {
     constructor(
@@ -87,20 +93,20 @@ contract MetaMorphoHarness is MetaMorpho {
     }
 
     function realTotalAssets() public view returns (uint256) {
-        uint256 realTotalAssets;
+        uint256 _realTotalAssets;
         for (uint256 i; i < withdrawQueue.length; ++i) {
-            realTotalAssets += MORPHO.expectedSupplyAssets(_marketParams(withdrawQueue[i]), address(this));
+            _realTotalAssets += MORPHO.expectedSupplyAssets(_marketParams(withdrawQueue[i]), address(this));
         }
-        return realTotalAssets;
+        return _realTotalAssets;
     }
 
     function newLostAssets() external view returns (uint256) {
-        uint256 realTotalAssets = realTotalAssets();
+        uint256 _realTotalAssets = realTotalAssets();
 
-        uint256 newLostAssets;
-        if (realTotalAssets < lastTotalAssets - lostAssets) newLostAssets = lastTotalAssets - realTotalAssets;
-        else newLostAssets = lostAssets;
+        uint256 _newLostAssets;
+        if (_realTotalAssets < lastTotalAssets - lostAssets) _newLostAssets = lastTotalAssets - _realTotalAssets;
+        else _newLostAssets = lostAssets;
 
-        return newLostAssets;
+        return _newLostAssets;
     }
 }

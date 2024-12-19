@@ -184,7 +184,7 @@ contract ReallocateWithdrawTest is IntegrationTest {
         allocations.push(MarketAllocation(allMarkets[2], suppliedAssets[2]));
 
         vm.prank(ALLOCATOR);
-        vm.expectRevert(abi.encodeWithSelector(ErrorsLib.UnauthorizedMarket.selector, allMarkets[1].id()));
+        vm.expectRevert(abi.encodeWithSelector(ErrorsLib.SupplyCapExceeded.selector, allMarkets[1].id()));
         vault.reallocate(allocations);
     }
 
@@ -212,6 +212,18 @@ contract ReallocateWithdrawTest is IntegrationTest {
 
         vm.prank(ALLOCATOR);
         vm.expectRevert(ErrorsLib.InconsistentReallocation.selector);
+        vault.reallocate(allocations);
+    }
+
+    function testReallocateZeroToDisabledMarket() public {
+        allocations.push(MarketAllocation(allMarkets[0], CAP2));
+        allocations.push(MarketAllocation(allMarkets[1], CAP2));
+        allocations.push(MarketAllocation(allMarkets[2], CAP2));
+        allocations.push(MarketAllocation(allMarkets[3], 0)); // non enabled market.
+        allocations.push(MarketAllocation(idleParams, type(uint256).max));
+
+        vm.prank(ALLOCATOR);
+        vm.expectRevert(abi.encodeWithSelector(ErrorsLib.MarketNotEnabled.selector, allMarkets[3].id()));
         vault.reallocate(allocations);
     }
 }
