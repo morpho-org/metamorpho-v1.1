@@ -3,20 +3,20 @@ pragma solidity ^0.8.0;
 
 import "./helpers/IntegrationTest.sol";
 
-import "../../src/MetaMorphoFactory.sol";
+import "../../src/MetaMorphoV1_1Factory.sol";
 
 contract MetaMorphoFactoryTest is IntegrationTest {
-    MetaMorphoFactory factory;
+    MetaMorphoV1_1Factory factory;
 
     function setUp() public override {
         super.setUp();
 
-        factory = new MetaMorphoFactory(address(morpho));
+        factory = new MetaMorphoV1_1Factory(address(morpho));
     }
 
     function testFactoryAddressZero() public {
         vm.expectRevert(ErrorsLib.ZeroAddress.selector);
-        new MetaMorphoFactory(address(0));
+        new MetaMorphoV1_1Factory(address(0));
     }
 
     function testCreateMetaMorpho(
@@ -30,7 +30,7 @@ contract MetaMorphoFactoryTest is IntegrationTest {
         initialTimelock = _boundInitialTimelock(initialTimelock);
 
         bytes32 initCodeHash = hashInitCode(
-            type(MetaMorpho).creationCode,
+            type(MetaMorphoV1_1).creationCode,
             abi.encode(initialOwner, address(morpho), initialTimelock, address(loanToken), name, symbol)
         );
         address expectedAddress = computeCreate2Address(salt, initCodeHash, address(factory));
@@ -40,7 +40,7 @@ contract MetaMorphoFactoryTest is IntegrationTest {
             expectedAddress, address(this), initialOwner, initialTimelock, address(loanToken), name, symbol, salt
         );
 
-        IMetaMorpho metaMorpho =
+        IMetaMorphoV1_1 metaMorpho =
             factory.createMetaMorpho(initialOwner, initialTimelock, address(loanToken), name, symbol, salt);
 
         assertEq(expectedAddress, address(metaMorpho), "computeCreate2Address");

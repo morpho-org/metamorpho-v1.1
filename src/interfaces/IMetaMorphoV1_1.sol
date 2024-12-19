@@ -26,9 +26,9 @@ interface IOwnable {
     function pendingOwner() external view returns (address);
 }
 
-/// @dev This interface is used for factorizing IMetaMorphoStaticTyping and IMetaMorpho.
-/// @dev Consider using the IMetaMorpho interface instead of this one.
-interface IMetaMorphoBase {
+/// @dev This interface is used for factorizing IMetaMorphoV1_1StaticTyping and IMetaMorphoV1_1.
+/// @dev Consider using the IMetaMorphoV1_1 interface instead of this one.
+interface IMetaMorphoV1_1Base {
     /// @notice The address of the Morpho contract.
     function MORPHO() external view returns (IMorpho);
     function DECIMALS_OFFSET() external view returns (uint8);
@@ -188,9 +188,9 @@ interface IMetaMorphoBase {
     function reallocate(MarketAllocation[] calldata allocations) external;
 }
 
-/// @dev This interface is inherited by MetaMorpho so that function signatures are checked by the compiler.
-/// @dev Consider using the IMetaMorpho interface instead of this one.
-interface IMetaMorphoStaticTyping is IMetaMorphoBase {
+/// @dev This interface is inherited by MetaMorphoV1_1 so that function signatures are checked by the compiler.
+/// @dev Consider using the IMetaMorphoV1_1 interface instead of this one.
+interface IMetaMorphoV1_1StaticTyping is IMetaMorphoV1_1Base {
     /// @notice Returns the current configuration of each market.
     function config(Id) external view returns (uint184 cap, bool enabled, uint64 removableAt);
 
@@ -204,11 +204,12 @@ interface IMetaMorphoStaticTyping is IMetaMorphoBase {
     function pendingTimelock() external view returns (uint192 value, uint64 validAt);
 }
 
-/// @title IMetaMorpho
+/// @title IMetaMorphoV1_1
 /// @author Morpho Labs
 /// @custom:contact security@morpho.org
-/// @dev Use this interface for MetaMorpho to have access to all the functions with the appropriate function signatures.
-interface IMetaMorpho is IMetaMorphoBase, IERC4626, IERC20Permit, IOwnable, IMulticall {
+/// @dev Use this interface for MetaMorphoV1_1 to have access to all the functions with the appropriate function
+/// signatures.
+interface IMetaMorphoV1_1 is IMetaMorphoV1_1Base, IERC4626, IERC20Permit, IOwnable, IMulticall {
     /// @notice Returns the current configuration of each market.
     function config(Id) external view returns (MarketConfig memory);
 

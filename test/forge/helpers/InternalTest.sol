@@ -2,10 +2,10 @@
 pragma solidity ^0.8.0;
 
 import "./BaseTest.sol";
-import {MetaMorpho} from "../../../src/MetaMorpho.sol";
+import {MetaMorphoV1_1} from "../../../src/MetaMorphoV1_1.sol";
 
-contract InternalTest is BaseTest, MetaMorpho {
-    constructor() MetaMorpho(OWNER, address(morpho), 1 days, address(loanToken), "MetaMorpho Vault", "MM") {}
+contract InternalTest is BaseTest, MetaMorphoV1_1 {
+    constructor() MetaMorphoV1_1(OWNER, address(morpho), 1 days, address(loanToken), "MetaMorpho Vault", "MM") {}
 
     function setUp() public virtual override {
         super.setUp();

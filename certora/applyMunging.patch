@@ -1,6 +1,6 @@
-diff -ruN interfaces/IMetaMorpho.sol interfaces/IMetaMorpho.sol
---- interfaces/IMetaMorpho.sol
-+++ interfaces/IMetaMorpho.sol
+diff -ruN interfaces/IMetaMorphoV1_1.sol interfaces/IMetaMorphoV1_1.sol
+--- interfaces/IMetaMorphoV1_1.sol
++++ interfaces/IMetaMorphoV1_1.sol
 @@ -1,7 +1,7 @@
  // SPDX-License-Identifier: GPL-2.0-or-later
  pragma solidity >=0.5.0;
@@ -11,21 +11,21 @@ diff -ruN interfaces/IMetaMorpho.sol interfaces/IMetaMorpho.sol
  import {IERC20Permit} from "../../lib/openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Permit.sol";
  
 @@ -30,7 +30,7 @@
- /// @dev Consider using the IMetaMorpho interface instead of this one.
- interface IMetaMorphoBase {
+ /// @dev Consider using the IMetaMorphoV1_1 interface instead of this one.
+ interface IMetaMorphoV1_1Base {
      /// @notice The address of the Morpho contract.
 -    function MORPHO() external view returns (IMorpho);
 +    function MORPHO() external view returns (IMorphoHarness);
      function DECIMALS_OFFSET() external view returns (uint8);
  
      /// @notice The address of the curator.
-diff -ruN MetaMorpho.sol MetaMorpho.sol
---- MetaMorpho.sol
-+++ MetaMorpho.sol
+diff -ruN MetaMorphoV1_1.sol MetaMorphoV1_1.sol
+--- MetaMorphoV1_1.sol
++++ MetaMorphoV1_1.sol
 @@ -9,7 +9,7 @@
-     IMetaMorphoBase,
-     IMetaMorphoStaticTyping
- } from "./interfaces/IMetaMorpho.sol";
+     IMetaMorphoV1_1Base,
+     IMetaMorphoV1_1StaticTyping
+ } from "./interfaces/IMetaMorphoV1_1.sol";
 -import {Id, MarketParams, Market, IMorpho} from "../lib/morpho-blue/src/interfaces/IMorpho.sol";
 +import {Id, MarketParams, Market, IMorphoHarness} from "../certora/helpers/IMorphoHarness.sol";
  
@@ -55,7 +55,7 @@ diff -ruN MetaMorpho.sol MetaMorpho.sol
 @@ -56,7 +52,7 @@
      /* IMMUTABLES */
  
-     /// @inheritdoc IMetaMorphoBase
+     /// @inheritdoc IMetaMorphoV1_1Base
 -    IMorpho public immutable MORPHO;
 +    IMorphoHarness public immutable MORPHO;
  

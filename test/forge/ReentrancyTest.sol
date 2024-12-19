@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 pragma solidity ^0.8.0;
 
-import {IMetaMorpho} from "../../src/interfaces/IMetaMorpho.sol";
+import {IMetaMorphoV1_1} from "../../src/interfaces/IMetaMorphoV1_1.sol";
 
 import {ERC1820Registry} from "../../src/mocks/ERC1820Registry.sol";
 import {ERC777Mock, IERC1820Registry} from "../../src/mocks/ERC777Mock.sol";
 import {IERC1820Implementer} from "../../lib/openzeppelin-contracts/contracts/interfaces/IERC1820Implementer.sol";
 
-import "../../src/MetaMorphoFactory.sol";
+import "../../src/MetaMorphoV1_1Factory.sol";
 import "./helpers/IntegrationTest.sol";
 
 uint256 constant FEE = 0.1 ether; // 50%
@@ -40,9 +40,9 @@ contract ReentrancyTest is IntegrationTest, IERC1820Implementer {
 
         morpho.createMarket(idleParams);
 
-        vault = IMetaMorpho(
+        vault = IMetaMorphoV1_1(
             address(
-                new MetaMorpho(OWNER, address(morpho), TIMELOCK, address(reentrantToken), "MetaMorpho Vault", "MMV")
+                new MetaMorphoV1_1(OWNER, address(morpho), TIMELOCK, address(reentrantToken), "MetaMorpho Vault", "MMV")
             )
         );
 
@@ -126,7 +126,7 @@ contract ReentrancyTest is IntegrationTest, IERC1820Implementer {
         if ((from == attacker) && (amount == 5000)) {
             // Don't call back on first deposit(1)
             vm.startPrank(attacker);
-            IMetaMorpho(to).withdraw(1, attacker, attacker);
+            IMetaMorphoV1_1(to).withdraw(1, attacker, attacker);
             vm.stopPrank();
         }
     }

@@ -1,8 +1,9 @@
-# MetaMorpho No Bad Debt Realization
+# MetaMorpho v1.1
 
-> [!NOTE]  
+> [!NOTE]
 > This repo is a fork of [metamorpho](https://github.com/morpho-org/metamorpho), with 4 changes:
-> - this MetaMorpho vault does not realize the bad debt (more on this [here](https://github.com/morpho-org/metamorpho-no-bad-debt-realization/blob/d16ecfed0da4b4c51ed65c2eba865f5623c2242b/src/interfaces/IMetaMorpho.sol#L81));
+>
+> - this MetaMorpho vault does not realize the bad debt (more on this [here](https://github.com/morpho-org/metamorpho-no-bad-debt-realization/blob/d16ecfed0da4b4c51ed65c2eba865f5623c2242b/src/interfaces/IMetaMorphoV1_1.sol#L81));
 > - the timelock can be set to zero at deployment;
 > - the name and symbol are mutable;
 > - `reallocate` always reverts if the market is not enabled in the vault.
@@ -17,9 +18,9 @@ Users of MetaMorpho are liquidity providers who want to earn from borrowing inte
 The active management of the deposited assets is the responsibility of a set of different roles (owner, curator and allocators).
 These roles are primarily responsible for enabling and disabling markets on Morpho Blue and managing the allocation of users’ funds.
 
-[`MetaMorpho`](./src/MetaMorpho.sol) vaults are [ERC-4626](https://eips.ethereum.org/EIPS/eip-4626) vaults, with ([ERC-2612](https://eips.ethereum.org/EIPS/eip-2612)) permit.
+[`MetaMorphoV1_1`](./src/MetaMorphoV1_1.sol) vaults are [ERC-4626](https://eips.ethereum.org/EIPS/eip-4626) vaults, with ([ERC-2612](https://eips.ethereum.org/EIPS/eip-2612)) permit.
 One MetaMorpho vault is related to one loan asset on Morpho Blue.
-The [`MetaMorphoFactory`](./src/MetaMorphoFactory.sol) is deploying immutable onchain instances of MetaMorpho vaults.
+The [`MetaMorphoV1_1Factory`](./src/MetaMorphoV1_1Factory.sol) is deploying immutable onchain instances of MetaMorpho vaults.
 
 Users can supply or withdraw assets at any time, depending on the available liquidity on Morpho Blue.
 A maximum of 30 markets can be enabled on a given MetaMorpho vault.

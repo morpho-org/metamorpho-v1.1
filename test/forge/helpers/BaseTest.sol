@@ -9,7 +9,7 @@ import {MarketParamsLib} from "../../../lib/morpho-blue/src/libraries/MarketPara
 import {MorphoLib} from "../../../lib/morpho-blue/src/libraries/periphery/MorphoLib.sol";
 import {MorphoBalancesLib} from "../../../lib/morpho-blue/src/libraries/periphery/MorphoBalancesLib.sol";
 
-import "../../../src/interfaces/IMetaMorpho.sol";
+import "../../../src/interfaces/IMetaMorphoV1_1.sol";
 
 import "../../../src/libraries/ConstantsLib.sol";
 import {ErrorsLib} from "../../../src/libraries/ErrorsLib.sol";

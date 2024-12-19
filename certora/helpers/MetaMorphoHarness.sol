@@ -3,15 +3,15 @@ pragma solidity 0.8.26;
 
 import {
     Math,
-    MetaMorpho,
+    MetaMorphoV1_1,
     Id,
     ConstantsLib,
     PendingUint192,
     PendingAddress,
     MarketConfig
-} from "../../munged/MetaMorpho.sol";
+} from "../../munged/MetaMorphoV1_1.sol";
 
-contract MetaMorphoHarness is MetaMorpho {
+contract MetaMorphoHarness is MetaMorphoV1_1 {
     constructor(
         address owner,
         address morpho,
@@ -19,7 +19,7 @@ contract MetaMorphoHarness is MetaMorpho {
         address _asset,
         string memory _name,
         string memory _symbol
-    ) MetaMorpho(owner, morpho, initialTimelock, _asset, _name, _symbol) {}
+    ) MetaMorphoV1_1(owner, morpho, initialTimelock, _asset, _name, _symbol) {}
 
     function pendingTimelock_() external view returns (PendingUint192 memory) {
         return pendingTimelock;
