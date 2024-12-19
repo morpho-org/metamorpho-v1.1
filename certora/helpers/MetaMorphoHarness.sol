@@ -3,7 +3,7 @@ pragma solidity 0.8.26;
 
 import {
     Math,
-    MetaMorpho,
+    MetaMorphoV1_1,
     Id,
     ConstantsLib,
     PendingUint192,

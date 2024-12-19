@@ -19,9 +19,9 @@ diff -ruN interfaces/IMetaMorphoV1_1.sol interfaces/IMetaMorphoV1_1.sol
      function DECIMALS_OFFSET() external view returns (uint8);
  
      /// @notice The address of the curator.
-diff -ruN MetaMorpho.sol MetaMorpho.sol
---- MetaMorpho.sol
-+++ MetaMorpho.sol
+diff -ruN MetaMorphoV1_1.sol MetaMorphoV1_1.sol
+--- MetaMorphoV1_1.sol
++++ MetaMorphoV1_1.sol
 @@ -9,7 +9,7 @@
      IMetaMorphoV1_1Base,
      IMetaMorphoV1_1StaticTyping

@@ -26,7 +26,7 @@ interface IOwnable {
     function pendingOwner() external view returns (address);
 }
 
-/// @dev This interface is used for factorizing IMetaMorphoV1_1StaticTyping and IMetaMorpho.
+/// @dev This interface is used for factorizing IMetaMorphoV1_1StaticTyping and IMetaMorphoV1_1.
 /// @dev Consider using the IMetaMorphoV1_1 interface instead of this one.
 interface IMetaMorphoV1_1Base {
     /// @notice The address of the Morpho contract.
@@ -188,7 +188,7 @@ interface IMetaMorphoV1_1Base {
     function reallocate(MarketAllocation[] calldata allocations) external;
 }
 
-/// @dev This interface is inherited by MetaMorpho so that function signatures are checked by the compiler.
+/// @dev This interface is inherited by MetaMorphoV1_1 so that function signatures are checked by the compiler.
 /// @dev Consider using the IMetaMorphoV1_1 interface instead of this one.
 interface IMetaMorphoV1_1StaticTyping is IMetaMorphoV1_1Base {
     /// @notice Returns the current configuration of each market.
@@ -204,10 +204,11 @@ interface IMetaMorphoV1_1StaticTyping is IMetaMorphoV1_1Base {
     function pendingTimelock() external view returns (uint192 value, uint64 validAt);
 }
 
-/// @title IMetaMorpho
+/// @title IMetaMorphoV1_1
 /// @author Morpho Labs
 /// @custom:contact security@morpho.org
-/// @dev Use this interface for MetaMorpho to have access to all the functions with the appropriate function signatures.
+/// @dev Use this interface for MetaMorphoV1_1 to have access to all the functions with the appropriate function
+/// signatures.
 interface IMetaMorphoV1_1 is IMetaMorphoV1_1Base, IERC4626, IERC20Permit, IOwnable, IMulticall {
     /// @notice Returns the current configuration of each market.
     function config(Id) external view returns (MarketConfig memory);
