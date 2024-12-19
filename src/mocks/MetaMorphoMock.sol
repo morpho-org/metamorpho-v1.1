@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 pragma solidity ^0.8.26;
 
-import "../MetaMorpho.sol";
+import "../MetaMorphoV1_1.sol";
 
-contract MetaMorphoMock is MetaMorpho {
+contract MetaMorphoMock is MetaMorphoV1_1 {
     constructor(
         address owner,
         address morpho,
@@ -11,7 +11,7 @@ contract MetaMorphoMock is MetaMorpho {
         address _asset,
         string memory __name,
         string memory __symbol
-    ) MetaMorpho(owner, morpho, initialTimelock, _asset, __name, __symbol) {}
+    ) MetaMorphoV1_1(owner, morpho, initialTimelock, _asset, __name, __symbol) {}
 
     function mockSetCap(MarketParams memory marketParams, Id id, uint184 supplyCap) external {
         _setCap(marketParams, id, supplyCap);
