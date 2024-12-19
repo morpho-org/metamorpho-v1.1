@@ -1,8 +1,8 @@
 import { BigNumberish } from "ethers";
-import { MetaMorpho__factory } from "types";
-import { MarketAllocationStruct, MarketParamsStruct } from "types/src/MetaMorpho";
+import { MetaMorphoV1_1__factory } from "types";
+import { MarketAllocationStruct, MarketParamsStruct } from "types/src/MetaMorphoV1_1";
 
-const METAMORPHO_IFC = MetaMorpho__factory.createInterface();
+const METAMORPHO_IFC = MetaMorphoV1_1__factory.createInterface();
 
 export type MetaMorphoCall = string;
 

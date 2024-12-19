@@ -2,10 +2,16 @@
 pragma solidity 0.8.26;
 
 import {
-    Math, MetaMorpho, Id, ConstantsLib, PendingUint192, PendingAddress, MarketConfig
-} from "../munged/MetaMorpho.sol";
+    Math,
+    MetaMorphoV1_1,
+    Id,
+    ConstantsLib,
+    PendingUint192,
+    PendingAddress,
+    MarketConfig
+} from "../../munged/MetaMorphoV1_1.sol";
 
-contract MetaMorphoHarness is MetaMorpho {
+contract MetaMorphoHarness is MetaMorphoV1_1 {
     constructor(
         address owner,
         address morpho,
@@ -13,7 +19,7 @@ contract MetaMorphoHarness is MetaMorpho {
         address _asset,
         string memory _name,
         string memory _symbol
-    ) MetaMorpho(owner, morpho, initialTimelock, _asset, _name, _symbol) {}
+    ) MetaMorphoV1_1(owner, morpho, initialTimelock, _asset, _name, _symbol) {}
 
     function pendingTimelock_() external view returns (PendingUint192 memory) {
         return pendingTimelock;
@@ -87,20 +93,20 @@ contract MetaMorphoHarness is MetaMorpho {
     }
 
     function realTotalAssets() public view returns (uint256) {
-        uint256 realTotalAssets;
+        uint256 _realTotalAssets;
         for (uint256 i; i < withdrawQueue.length; ++i) {
-            realTotalAssets += MORPHO.expectedSupplyAssets(_marketParams(withdrawQueue[i]), address(this));
+            _realTotalAssets += MORPHO.expectedSupplyAssets(_marketParams(withdrawQueue[i]), address(this));
         }
-        return realTotalAssets;
+        return _realTotalAssets;
     }
 
     function newLostAssets() external view returns (uint256) {
-        uint256 realTotalAssets = realTotalAssets();
+        uint256 _realTotalAssets = realTotalAssets();
 
-        uint256 newLostAssets;
-        if (realTotalAssets < lastTotalAssets - lostAssets) newLostAssets = lastTotalAssets - realTotalAssets;
-        else newLostAssets = lostAssets;
+        uint256 _newLostAssets;
+        if (_realTotalAssets < lastTotalAssets - lostAssets) _newLostAssets = lastTotalAssets - _realTotalAssets;
+        else _newLostAssets = lostAssets;
 
-        return newLostAssets;
+        return _newLostAssets;
     }
 }

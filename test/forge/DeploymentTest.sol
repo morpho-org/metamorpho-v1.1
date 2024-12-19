@@ -67,7 +67,7 @@ contract DeploymentTest is IntegrationTest {
         assumeNotZeroAddress(morpho);
         initialTimelock = _boundInitialTimelock(initialTimelock);
 
-        IMetaMorpho newVault = createMetaMorpho(owner, morpho, initialTimelock, address(loanToken), name, symbol);
+        IMetaMorphoV1_1 newVault = createMetaMorpho(owner, morpho, initialTimelock, address(loanToken), name, symbol);
 
         assertEq(newVault.owner(), owner, "owner");
         assertEq(address(newVault.MORPHO()), morpho, "morpho");
