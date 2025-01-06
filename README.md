@@ -247,7 +247,7 @@ You will find other useful commands in the [`package.json`](./package.json) file
 
 ## Audits
 
-All audits are stored in the [audits](./audits/)' folder.
+All audits are stored in the [audits](./audits/) folder.
 
 ## License
 
