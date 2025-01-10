@@ -4,6 +4,8 @@ test = "test/forge"
 libs = ["lib"]
 evm_version = "cancun"
 via-ir = true
+optimizer = true
+optimizer_runs = 200
 bytecode_hash = "none"
 
 [profile.default.rpc_endpoints]
