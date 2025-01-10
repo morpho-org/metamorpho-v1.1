@@ -4,10 +4,6 @@ test = "test/forge"
 libs = ["lib"]
 evm_version = "cancun"
 via-ir = true
-fs_permissions = [
-    { access = "read", path = "./config/"},
-    { access = "read", path = "./out/"}
-]
 bytecode_hash = "none"
 
 [profile.default.rpc_endpoints]
