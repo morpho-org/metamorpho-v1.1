@@ -238,7 +238,7 @@ await metamorpho.connect(curator).multicall([
 ## Developers
 
 > [!NOTE]
-> `MetaMorphoV1.1Factory` has been deployed on Ethereum and Base with the [metadata hash](https://docs.soliditylang.org/en/latest/metadata.html) included, which appear at two places in the bytecode as it is a factory.
+> `MetaMorphoV1_1Factory` has been deployed on Ethereum and Base with the [metadata hash](https://docs.soliditylang.org/en/latest/metadata.html) included, which appear at two places in the bytecode as it is a factory.
 
 Install dependencies: `yarn`
 
