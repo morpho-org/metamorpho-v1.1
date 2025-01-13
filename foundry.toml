@@ -2,7 +2,7 @@
 src = "src"
 test = "test/forge"
 libs = ["lib"]
-via-ir = true
+via_ir = true
 optimizer = true
 optimizer_runs = 200
 bytecode_hash = "none"
