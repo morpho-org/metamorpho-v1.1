@@ -193,7 +193,8 @@ If one of the allocators starts setting the withdraw queue and/or supply queue t
 
 ## Development
 
-> [!NOTE] > `MetaMorphoV1_1Factory` has been deployed on Ethereum and Base with the [metadata hash](https://docs.soliditylang.org/en/latest/metadata.html) included, which appear at two places in the bytecode as it is a factory.
+> [!NOTE]
+> `MetaMorphoV1_1Factory` has been deployed on Ethereum and Base with the [metadata hash](https://docs.soliditylang.org/en/latest/metadata.html) included, which appear at two places in the bytecode as it is a factory.
 
 Install dependencies: `yarn`
 
