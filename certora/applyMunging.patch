@@ -1,3 +1,24 @@
+diff -ruN interfaces/IMetaMorphoV1_1.sol interfaces/IMetaMorphoV1_1.sol
+--- interfaces/IMetaMorphoV1_1.sol
++++ interfaces/IMetaMorphoV1_1.sol
+@@ -1,7 +1,7 @@
+ // SPDX-License-Identifier: GPL-2.0-or-later
+ pragma solidity >=0.5.0;
+ 
+-import {IMorpho, Id, MarketParams} from "../../lib/morpho-blue/src/interfaces/IMorpho.sol";
++import {IMorphoHarness, Id, MarketParams} from "../../certora/helpers/IMorphoHarness.sol";
+ import {IERC4626} from "../../lib/openzeppelin-contracts/contracts/interfaces/IERC4626.sol";
+ import {IERC20Permit} from "../../lib/openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Permit.sol";
+ 
+@@ -30,7 +30,7 @@
+ /// @dev Consider using the IMetaMorphoV1_1 interface instead of this one.
+ interface IMetaMorphoV1_1Base {
+     /// @notice The address of the Morpho contract.
+-    function MORPHO() external view returns (IMorpho);
++    function MORPHO() external view returns (IMorphoHarness);
+ 
+     /// @notice OpenZeppelin decimals offset used by the ERC4626 implementation.
+     /// @dev Calculated to be max(0, 18 - underlyingDecimals).
 diff -ruN MetaMorphoV1_1.sol MetaMorphoV1_1.sol
 --- MetaMorphoV1_1.sol
 +++ MetaMorphoV1_1.sol
@@ -110,15 +131,3 @@ diff -ruN MetaMorphoV1_1.sol MetaMorphoV1_1.sol
              Id id = withdrawQueue[i];
              MarketParams memory marketParams = _marketParams(id);
              (uint256 supplyAssets,, Market memory market) = _accruedSupplyBalance(marketParams, id);
-diff -ruN interfaces/IMetaMorphoV1_1.sol interfaces/IMetaMorphoV1_1.sol
---- interfaces/IMetaMorphoV1_1.sol
-+++ interfaces/IMetaMorphoV1_1.sol
-@@ -1,7 +1,7 @@
- // SPDX-License-Identifier: GPL-2.0-or-later
- pragma solidity >=0.5.0;
- 
--import {IMorpho, Id, MarketParams} from "../../lib/morpho-blue/src/interfaces/IMorpho.sol";
-+import {IMorphoHarness, Id, MarketParams} from "../../certora/helpers/IMorphoHarness.sol";
- import {IERC4626} from "../../lib/openzeppelin-contracts/contracts/interfaces/IERC4626.sol";
- import {IERC20Permit} from "../../lib/openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Permit.sol";
- 
