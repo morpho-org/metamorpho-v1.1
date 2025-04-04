@@ -58,9 +58,7 @@ contract MetaMorphoV1_1 is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaM
     /// @inheritdoc IMetaMorphoV1_1Base
     IMorpho public immutable MORPHO;
 
-    /// @notice OpenZeppelin decimals offset used by the ERC4626 implementation.
-    /// @dev Calculated to be max(0, 18 - underlyingDecimals) at construction, so the initial conversion rate maximizes
-    /// precision between shares and assets.
+    /// @inheritdoc IMetaMorphoV1_1Base
     uint8 public immutable DECIMALS_OFFSET;
 
     /* STORAGE */
@@ -561,6 +559,9 @@ contract MetaMorphoV1_1 is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaM
     }
 
     /// @inheritdoc IERC4626
+    /// @notice For tokens with 18 decimals, the protection against the inflation front-running attack is low. To
+    /// protect against this attack, vault deployers should make an initial deposit of a non-trivial amount in the vault
+    /// or depositors should check that the share price does not exceed a certain limit.
     function deposit(uint256 assets, address receiver) public override returns (uint256 shares) {
         _accrueInterest();
 

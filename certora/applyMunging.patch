@@ -16,9 +16,9 @@ diff -ruN interfaces/IMetaMorphoV1_1.sol interfaces/IMetaMorphoV1_1.sol
      /// @notice The address of the Morpho contract.
 -    function MORPHO() external view returns (IMorpho);
 +    function MORPHO() external view returns (IMorphoHarness);
-     function DECIMALS_OFFSET() external view returns (uint8);
  
-     /// @notice The address of the curator.
+     /// @notice OpenZeppelin decimals offset used by the ERC4626 implementation.
+     /// @dev Calculated to be max(0, 18 - underlyingDecimals).
 diff -ruN MetaMorphoV1_1.sol MetaMorphoV1_1.sol
 --- MetaMorphoV1_1.sol
 +++ MetaMorphoV1_1.sol
@@ -59,9 +59,9 @@ diff -ruN MetaMorphoV1_1.sol MetaMorphoV1_1.sol
 -    IMorpho public immutable MORPHO;
 +    IMorphoHarness public immutable MORPHO;
  
-     /// @notice OpenZeppelin decimals offset used by the ERC4626 implementation.
-     /// @dev Calculated to be max(0, 18 - underlyingDecimals) at construction, so the initial conversion rate maximizes
-@@ -116,6 +112,19 @@
+     /// @inheritdoc IMetaMorphoV1_1Base
+     uint8 public immutable DECIMALS_OFFSET;
+@@ -114,6 +110,19 @@
      /// @dev "Overrides" the ERC20's storage variable to be able to modify it.
      string private _symbol;
  
@@ -81,7 +81,7 @@ diff -ruN MetaMorphoV1_1.sol MetaMorphoV1_1.sol
      /* CONSTRUCTOR */
  
      /// @dev Initializes the contract.
-@@ -145,7 +154,7 @@
+@@ -143,7 +152,7 @@
          _symbol = __symbol;
          emit EventsLib.SetSymbol(__symbol);
  
@@ -90,7 +90,7 @@ diff -ruN MetaMorphoV1_1.sol MetaMorphoV1_1.sol
          DECIMALS_OFFSET = uint8(uint256(18).zeroFloorSub(IERC20Metadata(_asset).decimals()));
  
          IERC20(_asset).forceApprove(morpho, type(uint256).max);
-@@ -366,6 +375,9 @@
+@@ -364,6 +373,9 @@
              seen[prevIndex] = true;
  
              newWithdrawQueue[i] = id;
@@ -100,7 +100,7 @@ diff -ruN MetaMorphoV1_1.sol MetaMorphoV1_1.sol
          }
  
          for (uint256 i; i < currLength; ++i) {
-@@ -383,6 +395,10 @@
+@@ -381,6 +393,10 @@
                      }
                  }
  
@@ -111,7 +111,7 @@ diff -ruN MetaMorphoV1_1.sol MetaMorphoV1_1.sol
                  delete config[id];
              }
          }
-@@ -770,6 +786,9 @@
+@@ -771,6 +787,9 @@
  
          if (supplyCap > 0) {
              if (!marketConfig.enabled) {
@@ -121,7 +121,7 @@ diff -ruN MetaMorphoV1_1.sol MetaMorphoV1_1.sol
                  withdrawQueue.push(id);
  
                  if (withdrawQueue.length > ConstantsLib.MAX_QUEUE_LENGTH) revert ErrorsLib.MaxQueueLengthExceeded();
-@@ -829,6 +848,9 @@
+@@ -830,6 +849,9 @@
      /// @dev Withdraws `assets` from Morpho.
      function _withdrawMorpho(uint256 assets) internal {
          for (uint256 i; i < withdrawQueue.length; ++i) {

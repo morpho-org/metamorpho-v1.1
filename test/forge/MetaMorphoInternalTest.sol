@@ -34,6 +34,7 @@ contract MetaMorphoInternalTest is BaseTest {
         vm.stopPrank();
     }
 
+    /// forge-config: default.allow_internal_expect_revert = true
     function testSetCapMaxQueueLengthExcedeed() public {
         for (uint256 i; i < NB_MARKETS - 1; ++i) {
             metaMorphoMock.mockSetCap(allMarkets[i], allMarkets[i].id(), CAP);
