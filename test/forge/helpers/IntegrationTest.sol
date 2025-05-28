@@ -61,12 +61,12 @@ contract IntegrationTest is BaseTest {
     }
 
     /// @dev Bounds the timelock to be smaller and in the acceptable range after deployment.
-    function _boundTimelock(uint256 timelock) internal view returns (uint256) {
+    function _boundTimelock(uint256 timelock) internal pure returns (uint256) {
         return bound(timelock, ConstantsLib.POST_INITIALIZATION_MIN_TIMELOCK, TIMELOCK - 1);
     }
 
     /// @dev Bounds the initial timelock to be in the acceptable range at deployment.
-    function _boundInitialTimelock(uint256 initialTimelock) internal view returns (uint256 boundedTimelock) {
+    function _boundInitialTimelock(uint256 initialTimelock) internal pure returns (uint256 boundedTimelock) {
         boundedTimelock = bound(initialTimelock, 0 days, ConstantsLib.MAX_TIMELOCK);
         if (boundedTimelock < ConstantsLib.POST_INITIALIZATION_MIN_TIMELOCK) boundedTimelock = 0;
     }
