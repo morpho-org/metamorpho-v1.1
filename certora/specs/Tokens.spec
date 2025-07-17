@@ -132,7 +132,7 @@ rule reallocateTokenChange(env e, MetaMorphoHarness.MarketAllocation[] allocatio
     uint256 balanceMetaMorphoAfter = ERC20.balanceOf(asset, currentContract);
     uint256 balanceSenderAfter = ERC20.balanceOf(asset, e.msg.sender);
 
-    assert balanceMorphoAfter == balanceMorphoAfter;
+    assert balanceMorphoAfter == balanceMorphoBefore;
     assert balanceMetaMorphoAfter == balanceMetaMorphoBefore;
     assert balanceSenderAfter == balanceSenderBefore;
 }
