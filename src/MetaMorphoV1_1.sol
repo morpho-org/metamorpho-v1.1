@@ -492,10 +492,7 @@ contract MetaMorphoV1_1 is ERC4626, ERC20Permit, Ownable2Step, Multicall, IMetaM
     }
 
     /// @inheritdoc IMetaMorphoV1_1Base
-    function acceptCap(MarketParams memory marketParams)
-        external
-        afterTimelock(pendingCap[marketParams.id()].validAt)
-    {
+    function acceptCap(MarketParams memory marketParams) external afterTimelock(pendingCap[marketParams.id()].validAt) {
         Id id = marketParams.id();
 
         // Safe "unchecked" cast because pendingCap <= type(uint184).max.
