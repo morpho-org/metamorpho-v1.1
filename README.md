@@ -195,18 +195,13 @@ If one of the allocators starts setting the withdraw queue and/or supply queue t
 - 3. Set a new withdraw queue that is in line with the vault risk strategy with the `updateWithdrawQueue` function (this can also be done by the curator or the other allocators).
 - 4. Set a new supply queue that is in line with the vault risk strategy with the `setSupplyQueue` function (this can also be done by the curator or the other allocators).
 
-## Development
+## Developers
 
 > [!NOTE]
 > `MetaMorphoV1_1Factory` has been deployed on Ethereum and Base with the [metadata hash](https://docs.soliditylang.org/en/latest/metadata.html) included, which appear at two places in the bytecode as it is a factory.
 
-Install dependencies: `yarn`
-
-Run forge tests: `yarn test:forge`
-
-Run hardhat tests: `yarn test:hardhat`
-
-You will find other useful commands in the [`package.json`](./package.json) file.
+Compilation, testing and formatting done with `forge`.
+Formal verification done with `certora`.
 
 ## Audits
 
