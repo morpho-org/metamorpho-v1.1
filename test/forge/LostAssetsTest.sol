@@ -206,7 +206,7 @@ contract LostAssetsTest is IntegrationTest {
         uint256 maxDonation = Math.mulDiv(
             uint256(type(uint128).max) - totalSupplyShares, totalSupplyAssets + 1, totalSupplyShares + 1e6
         );
-        donation = bound(donation, 1, Math.min(MAX_TEST_ASSETS, maxDonation));
+        donation = bound(donation, MIN_TEST_ASSETS, Math.min(MAX_TEST_ASSETS, maxDonation));
 
         uint256 totalAssetsBefore = vault.totalAssets();
 
