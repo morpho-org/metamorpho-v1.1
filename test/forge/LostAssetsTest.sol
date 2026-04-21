@@ -199,7 +199,13 @@ contract LostAssetsTest is IntegrationTest {
     function testDonationWithLostAssets(uint256 assets, uint128 expectedLostAssets, uint256 donation) public {
         expectedLostAssets = testLostAssetsValue(assets, expectedLostAssets);
 
-        donation = bound(donation, MIN_TEST_ASSETS, MAX_TEST_ASSETS);
+        // After testLostAssetsValue can set totalSupplyAssets as low as 0 while totalSupplyShares stays
+        // large, so cap donation such that the freshly minted supply shares fit in Morpho's uint128.
+        uint256 totalSupplyAssets = morpho.market(allMarkets[0].id()).totalSupplyAssets;
+        uint256 totalSupplyShares = morpho.market(allMarkets[0].id()).totalSupplyShares;
+        uint256 maxDonation =
+            Math.mulDiv(uint256(type(uint128).max) - totalSupplyShares, totalSupplyAssets + 1, totalSupplyShares + 1e6);
+        donation = bound(donation, 1, Math.min(MAX_TEST_ASSETS, maxDonation));
 
         uint256 totalAssetsBefore = vault.totalAssets();
 
