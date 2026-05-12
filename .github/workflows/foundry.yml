@@ -36,20 +36,12 @@ jobs:
         with:
           submodules: recursive
 
-      - uses: ./.github/actions/install-cache
+      - uses: ./.github/actions/install
 
       - name: Build contracts without IR
         run: yarn build:forge
         env:
           FOUNDRY_PROFILE: test
-
-      - name: Save forge compilation cache
-        uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
-        with:
-          path: |
-            cache
-            out
-          key: forge-${{ github.ref_name }}-${{ github.run_id }}
 
   test:
     needs: build-no-ir
@@ -79,7 +71,7 @@ jobs:
         with:
           submodules: recursive
 
-      - uses: ./.github/actions/install-cache
+      - uses: ./.github/actions/install
 
       - name: Run tests in ${{ matrix.type }} mode
         run: yarn test:forge -vvv
