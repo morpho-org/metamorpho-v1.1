@@ -1,0 +1,4 @@
+minimumReleaseAge: 10080
+allowBuilds:
+  "keccak": true
+  "secp256k1": true

@@ -24,7 +24,7 @@ jobs:
       - uses: ./.github/actions/install
 
       - name: Build contracts via IR & check sizes
-        run: yarn build:forge --force --sizes # don't use compilation cache
+        run: pnpm run build:forge --force --sizes # don't use compilation cache
 
   build-no-ir:
     name: Compilation (without IR)
@@ -39,7 +39,7 @@ jobs:
       - uses: ./.github/actions/install
 
       - name: Build contracts without IR
-        run: yarn build:forge
+        run: pnpm run build:forge
         env:
           FOUNDRY_PROFILE: test
 
@@ -74,7 +74,7 @@ jobs:
       - uses: ./.github/actions/install
 
       - name: Run tests in ${{ matrix.type }} mode
-        run: yarn test:forge -vvv
+        run: pnpm run test:forge -vvv
         env:
           FOUNDRY_FUZZ_RUNS: ${{ matrix.fuzz-runs }}
           FOUNDRY_FUZZ_MAX_TEST_REJECTS: ${{ matrix.max-test-rejects }}

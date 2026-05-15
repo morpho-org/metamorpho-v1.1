@@ -24,7 +24,7 @@ jobs:
       - uses: ./.github/actions/install
 
       - name: Build contracts
-        run: yarn build:hardhat --force # don't use compilation cache
+        run: pnpm run build:hardhat --force # don't use compilation cache
 
       - name: Run hardhat tests
-        run: yarn test:hardhat
+        run: pnpm run test:hardhat
