@@ -19,10 +19,12 @@ jobs:
       - uses: ./.github/actions/install
 
       - name: Build package
-        run: yarn build:pkg
+        - name: Enable pnpm
+          run: corepack enable
+        run: pnpm run build:pkg
 
       - name: Publish to npm
         run: |
           cp LICENSE README.md package.json dist/
           echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
-          yarn publish dist --access public --ignore-scripts
+          pnpm run publish dist --access public --ignore-scripts

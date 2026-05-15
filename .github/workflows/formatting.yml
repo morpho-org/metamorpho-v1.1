@@ -21,4 +21,6 @@ jobs:
       - uses: ./.github/actions/install
 
       - name: Run Linter
-        run: yarn lint
+        - name: Enable pnpm
+          run: corepack enable
+        run: pnpm run lint
