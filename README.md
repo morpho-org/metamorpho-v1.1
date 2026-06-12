@@ -1,4 +1,4 @@
-# MetaMorpho v1.1
+# Morpho Vault V1.1 (MetaMorpho v1.1)
 
 > [!NOTE]
 > This repo is a fork of [metamorpho](https://github.com/morpho-org/metamorpho), with 4 changes:
@@ -7,6 +7,9 @@
 > - the timelock can be set to zero at deployment;
 > - the name and symbol are mutable;
 > - `reallocate` always reverts if the market is not enabled in the vault.
+
+> [!NOTE]
+> The latest version of Morpho Vault is [Morpho Vault V2](https://github.com/morpho-org/vault-v2).
 
 ## Overview
 
@@ -195,18 +198,13 @@ If one of the allocators starts setting the withdraw queue and/or supply queue t
 - 3. Set a new withdraw queue that is in line with the vault risk strategy with the `updateWithdrawQueue` function (this can also be done by the curator or the other allocators).
 - 4. Set a new supply queue that is in line with the vault risk strategy with the `setSupplyQueue` function (this can also be done by the curator or the other allocators).
 
-## Development
+## Developers
+
+Compilation, testing and formatting done with `forge`.
+Formal verification done with `certora`.
 
 > [!NOTE]
 > `MetaMorphoV1_1Factory` has been deployed on Ethereum and Base with the [metadata hash](https://docs.soliditylang.org/en/latest/metadata.html) included, which appear at two places in the bytecode as it is a factory.
-
-Install dependencies: `yarn`
-
-Run forge tests: `yarn test:forge`
-
-Run hardhat tests: `yarn test:hardhat`
-
-You will find other useful commands in the [`package.json`](./package.json) file.
 
 ## Audits
 

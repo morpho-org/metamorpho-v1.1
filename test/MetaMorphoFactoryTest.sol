@@ -3,7 +3,7 @@ pragma solidity ^0.8.0;
 
 import "./helpers/IntegrationTest.sol";
 
-import "../../src/MetaMorphoV1_1Factory.sol";
+import "../src/MetaMorphoV1_1Factory.sol";
 
 contract MetaMorphoFactoryTest is IntegrationTest {
     MetaMorphoV1_1Factory factory;
