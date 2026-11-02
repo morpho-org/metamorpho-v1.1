@@ -10,7 +10,7 @@ contract BytecodeTest is Test {
     /// 0x878988f5f561081deEa117717052164ea1Ef0c82 in transaction
     /// 0xcee5eb8613d132f0a5010990e03f351694fc3a9aa790ed2c9686d56849165f11, without the constructor argument.
     function testFactoryCreationCodeMatchesArbitrumDeployment() public view {
-        bytes memory deployed = vm.parseBytes(vm.readLine("test/MetaMorphoV1_1FactoryCreationCode.hex"));
+        bytes memory deployed = vm.parseBytes(vm.readLine("test/helpers/MetaMorphoV1_1FactoryCreationCode.hex"));
         assertEq(deployed, type(MetaMorphoV1_1Factory).creationCode);
     }
 }

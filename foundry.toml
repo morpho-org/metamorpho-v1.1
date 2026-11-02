@@ -6,7 +6,7 @@ optimizer_runs = 200
 bytecode_hash = "none"
 evm_version = "cancun"
 fs_permissions = [
-    { access = "read", path = "test/MetaMorphoV1_1FactoryCreationCode.hex" },
+    { access = "read", path = "test/helpers/MetaMorphoV1_1FactoryCreationCode.hex" },
 ]
 
 [rpc_endpoints]
