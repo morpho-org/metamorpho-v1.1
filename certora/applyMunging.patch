@@ -90,7 +90,7 @@ diff -ruN MetaMorphoV1_1.sol MetaMorphoV1_1.sol
                  delete config[id];
              }
          }
-@@ -768,6 +784,9 @@
+@@ -774,6 +790,9 @@
  
          if (supplyCap > 0) {
              if (!marketConfig.enabled) {
@@ -100,7 +100,7 @@ diff -ruN MetaMorphoV1_1.sol MetaMorphoV1_1.sol
                  withdrawQueue.push(id);
  
                  if (withdrawQueue.length > ConstantsLib.MAX_QUEUE_LENGTH) revert ErrorsLib.MaxQueueLengthExceeded();
-@@ -827,6 +846,9 @@
+@@ -833,6 +852,9 @@
      /// @dev Withdraws `assets` from Morpho.
      function _withdrawMorpho(uint256 assets) internal {
          for (uint256 i; i < withdrawQueue.length; ++i) {

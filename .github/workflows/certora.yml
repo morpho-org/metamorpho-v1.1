@@ -29,6 +29,7 @@ jobs:
           - Range
           - Reentrancy
           - Reverts
+          - Roundtrip
           - Roles
           - Timelock
           - Tokens
