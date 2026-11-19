@@ -1,6 +1,6 @@
 munged: ../munged
 
-../munged: $(wildcard ../src/*.sol) applyMunging.patch
+../munged: $(shell find ../src -type f -name '*.sol') applyMunging.patch
 	@rm -rf ../munged
 	@cp -r ../src ../munged
 	@patch -p0 -d ../munged < applyMunging.patch
