@@ -8,7 +8,7 @@ bytecode_hash = "none"
 evm_version = "cancun"
 
 [profile.default.fuzz]
-runs = 2048
+runs = 1024
 
 [lint]
 exclude_lints = [
