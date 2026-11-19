@@ -1,5 +1,9 @@
 # Morpho Vault V1.1 (MetaMorpho v1.1)
 
+> [!WARNING]
+> This repository is no longer maintained: MetaMorpho V1.1 now lives in MetaMorpho, under [`src/v1.1`](https://github.com/morpho-org/metamorpho/tree/main/src/v1.1).
+> The compiled code is unchanged.
+
 > [!NOTE]
 > This repo is a fork of [metamorpho](https://github.com/morpho-org/metamorpho), with 4 changes:
 >
