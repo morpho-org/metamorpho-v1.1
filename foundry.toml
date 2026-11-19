@@ -7,6 +7,9 @@ optimizer_runs = 200
 bytecode_hash = "none"
 evm_version = "cancun"
 
+[profile.default.fuzz]
+runs = 2048
+
 [lint]
 exclude_lints = [
     "unaliased-plain-import",
