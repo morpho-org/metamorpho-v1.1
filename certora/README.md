@@ -36,9 +36,9 @@ It is verified in [`Tokens.spec`](specs/Tokens.spec) that all incoming tokens ar
 This verification relies on the fact that markets respect the constraints listed in the Morpho Blue documentation, in particular regarding ERC20 tokens.
 The verification is done for the most common ERC20 implementations, for which we distinguish three different implementations:
 
-- [ERC20Standard](dispatch/ERC20Standard.sol) which respects the standard and reverts in case of insufficient funds or in case of insufficient allowance.
-- [ERC20NoRevert](dispatch/ERC20NoRevert.sol) which respects the standard but does not revert (and returns false instead).
-- [ERC20USDT](dispatch/ERC20USDT.sol) which does not strictly respect the standard because it omits the return value of the `transfer` and `transferFrom` functions.
+- [ERC20Standard](../lib/morpho-blue/certora/dispatch/ERC20Standard.sol) which respects the standard and reverts in case of insufficient funds or in case of insufficient allowance.
+- [ERC20NoRevert](../lib/morpho-blue/certora/dispatch/ERC20NoRevert.sol) which respects the standard but does not revert (and returns false instead).
+- [ERC20USDT](../lib/morpho-blue/certora/dispatch/ERC20USDT.sol) which does not strictly respect the standard because it omits the return value of the `transfer` and `transferFrom` functions.
 
 ## Roles
 
@@ -220,7 +220,7 @@ The [`certora/confs`](confs) folder contains a configuration file for each cor
 The [`certora/helpers`](helpers) folder contains helper contracts that enable the verification of MetaMorpho.
 Notably, this allows handling the fact that library functions should be called from a contract to be verified independently, and it allows defining needed getters.
 
-The [`certora/dispatch`](dispatch) folder contains different contracts similar to the ones that are expected to be called from MetaMorpho.
+The [`lib/morpho-blue/certora/dispatch`](../lib/morpho-blue/certora/dispatch) folder contains different contracts similar to the ones that are expected to be called from MetaMorpho.
 
 ## Specification imports graph
 
