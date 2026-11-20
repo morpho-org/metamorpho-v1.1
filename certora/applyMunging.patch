@@ -1,16 +1,17 @@
 diff -ruN MetaMorphoV1_1.sol MetaMorphoV1_1.sol
 --- MetaMorphoV1_1.sol
 +++ MetaMorphoV1_1.sol
-@@ -9,7 +9,7 @@
+@@ -9,7 +9,8 @@
      IMetaMorphoV1_1Base,
      IMetaMorphoV1_1StaticTyping
  } from "./interfaces/IMetaMorphoV1_1.sol";
 -import {Id, MarketParams, Market, IMorpho} from "../lib/morpho-blue/src/interfaces/IMorpho.sol";
-+import {Id, MarketParams, Market, IMorphoHarness} from "../certora/helpers/IMorphoHarness.sol";
++import {Id, MarketParams, Market} from "../lib/morpho-blue/src/interfaces/IMorpho.sol";
++import {IMorphoHarness} from "../certora/helpers/IMorphoHarness.sol";
  
  import {PendingUint192, PendingAddress, PendingLib} from "./libraries/PendingLib.sol";
  import {ConstantsLib} from "./libraries/ConstantsLib.sol";
-@@ -19,10 +19,8 @@
+@@ -19,10 +20,8 @@
  import {UtilsLib} from "../lib/morpho-blue/src/libraries/UtilsLib.sol";
  import {SafeCast} from "../lib/openzeppelin-contracts/contracts/utils/math/SafeCast.sol";
  import {SharesMathLib} from "../lib/morpho-blue/src/libraries/SharesMathLib.sol";
@@ -21,7 +22,7 @@ diff -ruN MetaMorphoV1_1.sol MetaMorphoV1_1.sol
  
  import {Multicall} from "../lib/openzeppelin-contracts/contracts/utils/Multicall.sol";
  import {Ownable2Step, Ownable} from "../lib/openzeppelin-contracts/contracts/access/Ownable2Step.sol";
-@@ -45,9 +43,7 @@
+@@ -46,9 +45,7 @@
      using UtilsLib for uint256;
      using SafeCast for uint256;
      using SafeERC20 for IERC20;
@@ -29,9 +30,9 @@ diff -ruN MetaMorphoV1_1.sol MetaMorphoV1_1.sol
      using SharesMathLib for uint256;
 -    using MorphoBalancesLib for IMorpho;
      using MarketParamsLib for MarketParams;
-     using PendingLib for MarketConfig;
      using PendingLib for PendingUint192;
-@@ -56,7 +52,7 @@
+     using PendingLib for PendingAddress;
+@@ -56,7 +53,7 @@
      /* IMMUTABLES */
  
      /// @inheritdoc IMetaMorphoV1_1Base
@@ -40,7 +41,7 @@ diff -ruN MetaMorphoV1_1.sol MetaMorphoV1_1.sol
  
      /// @inheritdoc IMetaMorphoV1_1Base
      uint8 public immutable DECIMALS_OFFSET;
-@@ -114,6 +110,19 @@
+@@ -114,6 +111,19 @@
      /// @dev "Overrides" the ERC20's storage variable to be able to modify it.
      string private _symbol;
  
@@ -60,7 +61,7 @@ diff -ruN MetaMorphoV1_1.sol MetaMorphoV1_1.sol
      /* CONSTRUCTOR */
  
      /// @dev Initializes the contract.
-@@ -143,7 +152,7 @@
+@@ -143,7 +153,7 @@
          _symbol = __symbol;
          emit EventsLib.SetSymbol(__symbol);
  
@@ -69,7 +70,7 @@ diff -ruN MetaMorphoV1_1.sol MetaMorphoV1_1.sol
          DECIMALS_OFFSET = uint8(uint256(18).zeroFloorSub(IERC20Metadata(_asset).decimals()));
  
          IERC20(_asset).forceApprove(morpho, type(uint256).max);
-@@ -364,6 +373,9 @@
+@@ -364,6 +374,9 @@
              seen[prevIndex] = true;
  
              newWithdrawQueue[i] = id;
@@ -79,7 +80,7 @@ diff -ruN MetaMorphoV1_1.sol MetaMorphoV1_1.sol
          }
  
          for (uint256 i; i < currLength; ++i) {
-@@ -381,6 +393,10 @@
+@@ -381,6 +394,10 @@
                      }
                  }
  
@@ -90,7 +91,7 @@ diff -ruN MetaMorphoV1_1.sol MetaMorphoV1_1.sol
                  delete config[id];
              }
          }
-@@ -774,6 +790,9 @@
+@@ -774,6 +791,9 @@
  
          if (supplyCap > 0) {
              if (!marketConfig.enabled) {
@@ -100,7 +101,7 @@ diff -ruN MetaMorphoV1_1.sol MetaMorphoV1_1.sol
                  withdrawQueue.push(id);
  
                  if (withdrawQueue.length > ConstantsLib.MAX_QUEUE_LENGTH) revert ErrorsLib.MaxQueueLengthExceeded();
-@@ -833,6 +852,9 @@
+@@ -833,6 +853,9 @@
      /// @dev Withdraws `assets` from Morpho.
      function _withdrawMorpho(uint256 assets) internal {
          for (uint256 i; i < withdrawQueue.length; ++i) {

@@ -1,9 +1,9 @@
 munged: ../munged
 
-../munged: $(wildcard ../src/*.sol) applyMunging.patch
+../munged: $(shell find ../src -type f -name '*.sol') applyMunging.patch
 	@rm -rf ../munged
 	@cp -r ../src ../munged
-	@patch -p0 -d ../munged < applyMunging.patch
+	@patch -p0 -d ../munged < applyMunging.patch || { rm -rf ../munged; exit 1; }
 
 record:
 	diff -ruN ../src ../munged | sed -E 's,\.\./src/|\.\./munged/,,g' | sed -E 's,((\-\-\-|\+\+\+) [^[:space:]]*).*,\1,' > applyMunging.patch
